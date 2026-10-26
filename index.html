@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" content="#001223">
 <title>MW 销售工程师训练营 · 60 天</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAAnFBMVEUAEiP/////1gAAECHApgiOlp7/63+AdBH/2AAHFyLU19oHGCj4+PkAECMFFSL81AAwNhwsMx0cKzsRITHpxgNGU1///fHxzAIXIyAZJR81OhwOHCFAQxptZhRgXBXu7/A9S1dtd4Gdig2kqrFQXWjc3+HIrAhcWRbStAaxt7t7hY1lYBUoMyw7PxvXzo/hvwSplAzKuVErOkggLjQgpSv9AAADeUlEQVR4nO3ae1PTQBTG4dBQKdhUpYgiaFtbLop4/f7fzewmDdns5ZxszqaO875/ZzoPv1mSgSbLMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDIpczryvYn8i/Mmp5tvu65KmLq5Mb3ocWp4/3iwEocrvb+ZSlLt5/fvXAUhenH99dfFqkyl12vj06YqmVeTJ7uKEppfliNkuoVmaWWplnE6UmP7PsrK4s1TJGc3ltZqh1ZzWyte6sr0zUem8m1cWV7lyrg59Zdd6rZb3tzqS66Uy2bjqnat02B9WtzlTrtjlFa9McUBudK/WTO2DxfDZStM4ts1etOk86u/vgohRmZ/nWttmjru91HYtLbXWWbv32zDY71dbZ8LZ2dJZVu80OtbOzu7Wrs+QJWXvMltrX2W7t6SzX2tfZUnfudaHWvs5CrXN/54461NlUBzrLtA51NtTBzqY6bB7cOqfMjZro3FI773WSrWlzrXY9U+wpNXE2BrdmdN6rffc6u/WC7DxMzTMr9TdOZ7W7J0bnSn2f1FyqvzPNk8kPTmet/nkdcazD9zpzly+YlAn7uuPXSTv3UzN3/KZ/Z+KZklpddo44G/06S6tnUZ37myXVY3WWVI/XWU4dZY7sLKUe82yIqaM6973XyarH7yygHuWZIqs+TOdh6nHvdTLqw3WOVx+yc6x67GeKhPqwZyNSfYBnylD1v9C5tzrqd3D5hWtZsX+6y1/sv2GjOvNPx2rzm/nzzad/TnjquPtGxn5+rzYvc556Pl0W1yx1bGeuWpmzUj3nmPOMpY7uzFRrc3nl+ZZlzjjqQWaGujZrdbj18/9/KfWAs8FSN2ZS3f5PO6Ee1plUl+bWlaETYn6nEVIP7kyoW51rta9199ujgHp456C6Yw60tr+n86lFOgfUltnb2vWNqFs98L5Bqh1mT2v3d88utVhnj9ppdrb2fctvqwU7O9Ues6O1/32KrlrYbKm9Zqt16M0VUy16NhzqgLmjDr8jZKilO3fUxjPFqWaZDXWCztqyVwc76yub1lvqvbdGnaKztlRq0ty0nm/PyTcMK3Wiztqi1AzzvjVtrtXi9w3Dsj5jmSs1x1yp03XWlvWOZVbqDcus1I8JO2tLwX2/O+/xJnjiN7wxDMMwDMMwDMMwDMMwDMMwDMMwDMMwDMMwDMMwDPt/9xeYmGUjUJMxvQAAAABJRU5ErkJggg==">
 <style>
 
 /* ============================================================
@@ -505,6 +506,98 @@ figure.fig figcaption{font-size:12px;color:var(--muted);margin-top:8px;text-alig
 
 .tbl td{white-space:pre-line}
 
+﻿/* ================= MW brand layer ================= */
+/* 閸濅胶澧濋懝鎻掑絿閼?MW 鐎规ɑ鏌熼弽鍥槕閿涙碍绻佸ù宄板晽閽?#001223 / 娣団€冲娇姒?#FFD600 / 閻?*/
+:root{
+  --bg:#F6F7F9; --panel:#FFFFFF; --panel-2:#FAFBFC;
+  --ink:#001223; --ink-2:#31425A; --muted:#5C6B7E;
+  --line:#E4E8EF; --line-2:#C9D3E0;
+  --brand:#001223; --brand-2:#FFD600; --brand-soft:#FFF5C2;
+  --accent:#B45309; --accent-soft:#FDF3E3;
+  --blue:#1E3A8A; --blue-soft:#EAF0FB;
+  --danger:#C62828;
+  --mw-yellow:#FFD600; --mw-navy:#001223;
+  --shadow:0 1px 2px rgba(0,18,35,.05),0 10px 28px -16px rgba(0,18,35,.22);
+  --shadow-lg:0 24px 60px -30px rgba(0,18,35,.38);
+}
+html[data-theme="dark"]{
+  --bg:#000A14; --panel:#061320; --panel-2:#0A1826;
+  --ink:#F2F7FC; --ink-2:#C6D4E4; --muted:#8CA0B6;
+  --line:#15263A; --line-2:#22374F;
+  --brand:#FFD600; --brand-2:#FFE566; --brand-soft:rgba(255,214,0,.16);
+  --accent:#F59E0B; --accent-soft:#2A2110;
+  --blue:#7AA2FF; --blue-soft:#111E36;
+  --danger:#FF6B6B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -18px rgba(0,0,0,.75);
+  --shadow-lg:0 26px 64px -32px rgba(0,0,0,.85);
+}
+
+.brand-logo{width:38px;height:38px;flex:0 0 38px;border-radius:10px;display:block;box-shadow:0 8px 18px -12px rgba(0,18,35,.75)}
+.brand-txt b{letter-spacing:.3px}
+
+.btn-primary{background:var(--mw-yellow);color:var(--mw-navy);border-color:var(--mw-yellow);box-shadow:0 10px 24px -14px rgba(255,214,0,.95);font-weight:700}
+.btn-primary:hover{filter:brightness(1.04);transform:translateY(-1px)}
+.scroll-progress i{background:var(--mw-yellow)}
+
+.hero{
+  background:
+    radial-gradient(900px 460px at 92% -25%,rgba(255,214,0,.18),transparent 62%),
+    linear-gradient(142deg,#001223 0%,#07203A 58%,#001223 100%);
+  border-color:transparent;
+  box-shadow:0 34px 70px -46px rgba(0,18,35,.95);
+}
+.hero::after{background:radial-gradient(circle,rgba(255,214,0,.24),transparent 68%)}
+.hero::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.06;
+  background-image:repeating-linear-gradient(135deg,#FFD600 0 1px,transparent 1px 14px);
+}
+.hero .eyebrow{color:var(--mw-yellow);letter-spacing:2px}
+.hero h1{color:#FFFFFF}
+.hero h1 em{color:var(--mw-yellow);font-style:normal}
+.hero p{color:#B7C6D8}
+.hero .stat{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.13);box-shadow:none}
+.hero .stat b{color:#FFFFFF}
+.hero .stat span{color:#8FA3B9}
+.hero .btn-ghost{background:transparent;border-color:rgba(255,255,255,.28);color:#FFFFFF}
+.hero .btn-ghost:hover{border-color:var(--mw-yellow);color:var(--mw-yellow);background:rgba(255,214,0,.08)}
+
+.tab.active{background:var(--mw-navy);color:#FFFFFF;box-shadow:0 8px 18px -12px rgba(0,18,35,.8)}
+html[data-theme="dark"] .tab.active{background:var(--mw-yellow);color:var(--mw-navy)}
+.nav a.on{background:var(--brand-soft);color:var(--mw-navy);font-weight:700}
+html[data-theme="dark"] .nav a.on{color:var(--mw-yellow)}
+
+.chip.brand{background:var(--brand-soft);color:var(--mw-navy);border-color:rgba(0,18,35,.12)}
+html[data-theme="dark"] .chip.brand{color:var(--mw-yellow);border-color:rgba(255,214,0,.25)}
+.today-tag{background:var(--brand-soft);color:var(--mw-navy);border-color:rgba(0,18,35,.12)}
+html[data-theme="dark"] .today-tag{color:var(--mw-yellow);border-color:rgba(255,214,0,.25)}
+.today::before{background:var(--mw-yellow)}
+
+.article h2{border-left:4px solid var(--mw-yellow);padding-left:13px;line-height:1.35}
+.lesson-row.today .idx{background:var(--mw-yellow);color:var(--mw-navy);border-color:var(--mw-yellow)}
+.lesson-row.done .idx{background:var(--mw-navy);border-color:var(--mw-navy);color:var(--mw-yellow)}
+html[data-theme="dark"] .lesson-row.done .idx{background:var(--mw-yellow);color:var(--mw-navy);border-color:var(--mw-yellow)}
+
+.quizbox::before{background:linear-gradient(90deg,var(--mw-yellow) 0 60%,var(--mw-navy) 60% 100%)}
+html[data-theme="dark"] .quizbox::before{background:linear-gradient(90deg,var(--mw-yellow) 0 60%,#FFE566 60% 100%)}
+.quiz-bar i{background:var(--mw-yellow)}
+.q-opt.sel{border-color:var(--mw-navy);background:var(--brand-soft)}
+html[data-theme="dark"] .q-opt.sel{border-color:var(--mw-yellow);background:var(--brand-soft)}
+.q-opt.ok{border-color:var(--mw-navy);background:var(--brand-soft)}
+html[data-theme="dark"] .q-opt.ok{border-color:var(--mw-yellow)}
+.q-opt.sel .k,.q-opt.ok .k{background:var(--mw-yellow);border-color:var(--mw-yellow);color:var(--mw-navy)}
+
+.done-btn.is-done{background:var(--mw-yellow);color:var(--mw-navy);border-color:var(--mw-yellow)}
+.tabbar a.on{color:var(--mw-navy);font-weight:700}
+html[data-theme="dark"] .tabbar a.on{color:var(--mw-yellow)}
+.foot{border-top:3px solid var(--mw-yellow)}
+.foot-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:700;color:var(--ink)}
+.foot-brand img{width:26px;height:26px;border-radius:7px;display:block}
+html[data-theme="dark"] .brand-logo{box-shadow:0 0 0 1px rgba(255,255,255,.10)}
+.section-h h2{position:relative;padding-bottom:9px}
+.section-h h2::after{content:"";position:absolute;left:0;bottom:0;width:28px;height:3px;border-radius:2px;background:var(--mw-yellow)}
+html[data-theme="dark"] .lesson-row.today{background:rgba(255,214,0,.10)}
+
+
 
 </style>
 </head>
@@ -514,7 +607,7 @@ figure.fig figcaption{font-size:12px;color:var(--muted);margin-top:8px;text-alig
 <header class="hdr">
   <div class="hdr-in">
     <a class="brand" href="#/home" aria-label="返回首页">
-      <span class="brand-mark">MW</span>
+      <img class="brand-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAAnFBMVEUAEiP/////1gAAECHApgiOlp7/63+AdBH/2AAHFyLU19oHGCj4+PkAECMFFSL81AAwNhwsMx0cKzsRITHpxgNGU1///fHxzAIXIyAZJR81OhwOHCFAQxptZhRgXBXu7/A9S1dtd4Gdig2kqrFQXWjc3+HIrAhcWRbStAaxt7t7hY1lYBUoMyw7PxvXzo/hvwSplAzKuVErOkggLjQgpSv9AAADeUlEQVR4nO3ae1PTQBTG4dBQKdhUpYgiaFtbLop4/f7fzewmDdns5ZxszqaO875/ZzoPv1mSgSbLMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDIpczryvYn8i/Mmp5tvu65KmLq5Mb3ocWp4/3iwEocrvb+ZSlLt5/fvXAUhenH99dfFqkyl12vj06YqmVeTJ7uKEppfliNkuoVmaWWplnE6UmP7PsrK4s1TJGc3ltZqh1ZzWyte6sr0zUem8m1cWV7lyrg59Zdd6rZb3tzqS66Uy2bjqnat02B9WtzlTrtjlFa9McUBudK/WTO2DxfDZStM4ts1etOk86u/vgohRmZ/nWttmjru91HYtLbXWWbv32zDY71dbZ8LZ2dJZVu80OtbOzu7Wrs+QJWXvMltrX2W7t6SzX2tfZUnfudaHWvs5CrXN/54461NlUBzrLtA51NtTBzqY6bB7cOqfMjZro3FI773WSrWlzrXY9U+wpNXE2BrdmdN6rffc6u/WC7DxMzTMr9TdOZ7W7J0bnSn2f1FyqvzPNk8kPTmet/nkdcazD9zpzly+YlAn7uuPXSTv3UzN3/KZ/Z+KZklpddo44G/06S6tnUZ37myXVY3WWVI/XWU4dZY7sLKUe82yIqaM6973XyarH7yygHuWZIqs+TOdh6nHvdTLqw3WOVx+yc6x67GeKhPqwZyNSfYBnylD1v9C5tzrqd3D5hWtZsX+6y1/sv2GjOvNPx2rzm/nzzad/TnjquPtGxn5+rzYvc556Pl0W1yx1bGeuWpmzUj3nmPOMpY7uzFRrc3nl+ZZlzjjqQWaGujZrdbj18/9/KfWAs8FSN2ZS3f5PO6Ee1plUl+bWlaETYn6nEVIP7kyoW51rta9199ujgHp456C6Yw60tr+n86lFOgfUltnb2vWNqFs98L5Bqh1mT2v3d88utVhnj9ppdrb2fctvqwU7O9Ues6O1/32KrlrYbKm9Zqt16M0VUy16NhzqgLmjDr8jZKilO3fUxjPFqWaZDXWCztqyVwc76yub1lvqvbdGnaKztlRq0ty0nm/PyTcMK3Wiztqi1AzzvjVtrtXi9w3Dsj5jmSs1x1yp03XWlvWOZVbqDcus1I8JO2tLwX2/O+/xJnjiN7wxDMMwDMMwDMMwDMMwDMMwDMMwDMMwDMMwDMMwDPt/9xeYmGUjUJMxvQAAAABJRU5ErkJggg==" alt="MW Components" width="38" height="38">
       <span class="brand-txt">
         <b>销售工程师训练营</b>
         <i>60 个工作日 · 每天 1 小时</i>
@@ -540,6 +633,7 @@ figure.fig figcaption{font-size:12px;color:var(--muted);margin-top:8px;text-alig
 
 <footer class="foot">
   <div class="foot-in">
+    <div class="foot-brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAAnFBMVEUAEiP/////1gAAECHApgiOlp7/63+AdBH/2AAHFyLU19oHGCj4+PkAECMFFSL81AAwNhwsMx0cKzsRITHpxgNGU1///fHxzAIXIyAZJR81OhwOHCFAQxptZhRgXBXu7/A9S1dtd4Gdig2kqrFQXWjc3+HIrAhcWRbStAaxt7t7hY1lYBUoMyw7PxvXzo/hvwSplAzKuVErOkggLjQgpSv9AAADeUlEQVR4nO3ae1PTQBTG4dBQKdhUpYgiaFtbLop4/f7fzewmDdns5ZxszqaO875/ZzoPv1mSgSbLMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDMAzDIpczryvYn8i/Mmp5tvu65KmLq5Mb3ocWp4/3iwEocrvb+ZSlLt5/fvXAUhenH99dfFqkyl12vj06YqmVeTJ7uKEppfliNkuoVmaWWplnE6UmP7PsrK4s1TJGc3ltZqh1ZzWyte6sr0zUem8m1cWV7lyrg59Zdd6rZb3tzqS66Uy2bjqnat02B9WtzlTrtjlFa9McUBudK/WTO2DxfDZStM4ts1etOk86u/vgohRmZ/nWttmjru91HYtLbXWWbv32zDY71dbZ8LZ2dJZVu80OtbOzu7Wrs+QJWXvMltrX2W7t6SzX2tfZUnfudaHWvs5CrXN/54461NlUBzrLtA51NtTBzqY6bB7cOqfMjZro3FI773WSrWlzrXY9U+wpNXE2BrdmdN6rffc6u/WC7DxMzTMr9TdOZ7W7J0bnSn2f1FyqvzPNk8kPTmet/nkdcazD9zpzly+YlAn7uuPXSTv3UzN3/KZ/Z+KZklpddo44G/06S6tnUZ37myXVY3WWVI/XWU4dZY7sLKUe82yIqaM6973XyarH7yygHuWZIqs+TOdh6nHvdTLqw3WOVx+yc6x67GeKhPqwZyNSfYBnylD1v9C5tzrqd3D5hWtZsX+6y1/sv2GjOvNPx2rzm/nzzad/TnjquPtGxn5+rzYvc556Pl0W1yx1bGeuWpmzUj3nmPOMpY7uzFRrc3nl+ZZlzjjqQWaGujZrdbj18/9/KfWAs8FSN2ZS3f5PO6Ee1plUl+bWlaETYn6nEVIP7kyoW51rta9199ujgHp456C6Yw60tr+n86lFOgfUltnb2vWNqFs98L5Bqh1mT2v3d88utVhnj9ppdrb2fctvqwU7O9Ues6O1/32KrlrYbKm9Zqt16M0VUy16NhzqgLmjDr8jZKilO3fUxjPFqWaZDXWCztqyVwc76yub1lvqvbdGnaKztlRq0ty0nm/PyTcMK3Wiztqi1AzzvjVtrtXi9w3Dsj5jmSs1x1yp03XWlvWOZVbqDcus1I8JO2tLwX2/O+/xJnjiN7wxDMMwDMMwDMMwDMMwDMMwDMMwDMMwDMMwDMMwDPt/9xeYmGUjUJMxvQAAAABJRU5ErkJggg==" alt="MW Components"> MW Components · 销售工程师训练营</div>
     <p><b>MW 销售工程师训练营</b>　·　每周一至周五 09:00 解锁一课　·　每课约 60 分钟</p>
     <p class="fine">站内所有参数、寿命与量级均为教学用途，正式选型请以 MW 官方样本与工程确认为准。</p>
   </div>
