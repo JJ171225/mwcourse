@@ -921,7 +921,7 @@ window.COURSE = {
 
   var C = window.COURSE;
   var $ = function (s, r) { return (r || document).querySelector(s); };
-  var $ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
   /* ---------------- 工具 ---------------- */
   function esc(s) {
@@ -989,7 +989,7 @@ window.COURSE = {
   }
 
   function setActiveNav(name) {
-    $("[data-nav]").forEach(function (a) {
+    $$("[data-nav]").forEach(function (a) {
       a.classList.toggle("on", a.getAttribute("data-nav") === name);
     });
   }
