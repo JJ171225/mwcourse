@@ -1940,7 +1940,7 @@ window.COURSE.content[6] = {
 
   var state = {
     cat: "bellows", fam: "ameriflex",
-    yaw: 0.95, pitch: 0.3, zoom: 1, auto: true, drag: null,
+    yaw: 1.35, pitch: 0.24, zoom: 1, auto: true, drag: null,
     p: {}
   };
 
@@ -2161,7 +2161,7 @@ window.COURSE.content[6] = {
         }
         for (var k2 = 0; k2 < segs; k2++) {
           var i0 = base + k2 * 2, i1 = base + ((k2 + 1) % segs) * 2;
-          faces.push({ v: [i0, i1, i1 + 1, i0 + 1], c: [142, 152, 166] });
+          faces.push({ v: [i0, i1, i1 + 1, i0 + 1], c: [188, 196, 208] });
         }
       });
     }
@@ -2169,7 +2169,10 @@ window.COURSE.content[6] = {
       var c0 = verts.length; verts.push([0, 0, z]);
       var r0 = R * 0.99, b0 = verts.length;
       for (var k = 0; k < segs; k++) { var a = k / segs * 2 * PI; verts.push([MATH.cos(a) * r0, MATH.sin(a) * r0, z]); }
-      for (var k2 = 0; k2 < segs; k2++) faces.push({ v: [c0, b0 + k2, b0 + (k2 + 1) % segs], c: [150, 158, 170] });
+      for (var k2 = 0; k2 < segs; k2++) faces.push({ v: [c0, b0 + k2, b0 + (k2 + 1) % segs], c: [176, 184, 196] });
+      var ir = R * 0.45, ic = verts.length; verts.push([0, 0, z + (z > 0 ? -0.6 : 0.6)]);
+      var ib = verts.length; for (var kk = 0; kk < segs; kk++) { var aa = kk / segs * 2 * Math.PI; verts.push([Math.cos(aa) * ir, Math.sin(aa) * ir, z + (z > 0 ? -0.6 : 0.6)]); }
+      for (var kk2 = 0; kk2 < segs; kk2++) faces.push({ v: [ic, ib + kk2, ib + (kk2 + 1) % segs], c: [64, 72, 84] });
     });
     return { verts: verts, faces: faces, tint: [198, 206, 218] };
   }
@@ -2347,7 +2350,7 @@ window.COURSE.content[6] = {
       var n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
       var nl = MATH.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]) || 1;
       n = [n[0] / nl, n[1] / nl, n[2] / nl];
-      if (n[2] < -0.02) return;
+      if (n[2] < -0.02) n = [-n[0], -n[1], -n[2]]; // 背面不剔除，用双面光照，避免看穿
       var diff = MATH.max(0, n[0] * light[0] + n[1] * light[1] + n[2] * light[2]);
       var spec = MATH.pow(MATH.max(0, n[0] * half[0] + n[1] * half[1] + n[2] * half[2]), 22) * 0.55;
       var shade = 0.34 + 0.66 * diff;
@@ -2374,7 +2377,7 @@ window.COURSE.content[6] = {
   }
 
   function loop(ts) {
-    if (state.auto && !state.drag) state.yaw += 0.0045;
+    if (state.auto && !state.drag) state.yaw = 1.35 + 0.38 * Math.sin((ts || 0) * 0.0006);
     if (!LAST || ts - LAST > 33) { draw(); LAST = ts; }
     RAF = requestAnimationFrame(loop);
   }
@@ -2645,7 +2648,7 @@ window.COURSE.content[6] = {
       state.zoom = clamp(state.zoom * (e.deltaY > 0 ? 0.94 : 1.06), 0.5, 2.4);
     }, { passive: false });
     CANVAS.addEventListener("dblclick", function () {
-      state.yaw = 0.95; state.pitch = 0.3; state.zoom = 1; state.auto = true;
+      state.yaw = 1.35; state.pitch = 0.24; state.zoom = 1; state.auto = true;
     });
   }
 
