@@ -404,7 +404,7 @@ figure.fig figcaption{font-size:12px;color:var(--muted);margin-top:8px;text-alig
   .toc a{font-size:12px;padding:5px 9px;background:var(--panel-2);border:1px solid var(--line)}
   .toc .toc-prog{display:none}
   .tabbar{
-    display:grid;grid-template-columns:repeat(3,1fr);position:fixed;left:0;right:0;bottom:0;z-index:80;
+    display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:80;
     background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);
     border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);
   }
@@ -599,6 +599,69 @@ html[data-theme="dark"] .lesson-row.today{background:rgba(255,214,0,.10)}
 
 
 
+/* ============ 3D 实验室 ============ */
+.lab-head{max-width:1180px;margin:0 auto;padding:34px 24px 8px}
+.lab-head h1{font-size:clamp(1.6rem,3vw,2.2rem);margin:0 0 8px;letter-spacing:-.02em}
+.lab-head p{margin:0;color:var(--muted);max-width:70ch;line-height:1.7}
+.lab-badge{display:inline-block;margin-bottom:10px;padding:4px 10px;border-radius:999px;background:var(--accent);color:#08233f;font-size:.72rem;font-weight:800;letter-spacing:.08em}
+
+.lab-grid{max-width:1180px;margin:18px auto 40px;padding:0 24px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px;align-items:start}
+@media(max-width:900px){.lab-grid{grid-template-columns:1fr;padding:0 16px}}
+
+.lab-stage{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative}
+.lab-tabs{display:flex;gap:6px;padding:10px 10px 0;flex-wrap:wrap}
+.lab-tabs button{border:1px solid var(--line);background:var(--panel-2);color:var(--ink-2);border-radius:999px;padding:7px 14px;font:inherit;font-size:.85rem;font-weight:650;cursor:pointer;transition:.15s}
+.lab-tabs button:hover{border-color:var(--ink-3)}
+.lab-tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lab-canvas-wrap{position:relative;aspect-ratio:4/3;min-height:320px;background:radial-gradient(circle at 50% 35%,#f7f9fc,#e7ecf4)}
+[data-theme="dark"] .lab-canvas-wrap{background:radial-gradient(circle at 50% 35%,#152033,#0b1420)}
+.lab-canvas-wrap canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.lab-canvas-wrap canvas:active{cursor:grabbing}
+.lab-hud{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
+.lab-hud span{background:rgba(8,18,32,.78);color:#fff;font-size:.72rem;padding:4px 9px;border-radius:6px;font-variant-numeric:tabular-nums}
+.lab-tip{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.85);color:#33445c;font-size:.72rem;padding:5px 9px;border-radius:6px}
+[data-theme="dark"] .lab-tip{background:rgba(10,20,34,.8);color:#c8d4e4}
+.lab-legend{display:flex;gap:14px;padding:10px 14px;border-top:1px solid var(--line);font-size:.76rem;color:var(--muted);flex-wrap:wrap}
+.lab-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.lab-legend .ok{background:#1f9d55}.lab-legend .warn{background:#d99a00}.lab-legend .bad{background:#d34a3a}
+
+.lab-panel{display:flex;flex-direction:column;gap:14px}
+.lab-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.lab-card h2{font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.lab-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lab-fields label{display:flex;flex-direction:column;gap:5px;font-size:.76rem;color:var(--ink-2)}
+.lab-fields label > span{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.74rem}
+.lab-fields label > span input{flex:1}
+.lab-fields input,.lab-fields select{font:inherit;font-size:.9rem;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--ink);width:100%}
+.lab-fields input:focus,.lab-fields select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.lab-fields .wide{grid-column:1/-1}
+
+.lab-verdict{border-radius:14px;padding:14px 16px;border:1px solid var(--line);background:var(--panel)}
+.lab-verdict b{display:block;font-size:1.05rem;margin-bottom:4px}
+.lab-verdict p{margin:0;font-size:.82rem;color:var(--muted);line-height:1.6}
+.lab-verdict.ok{border-color:#1f9d55;background:rgba(31,157,85,.08)}
+.lab-verdict.warn{border-color:#d99a00;background:rgba(217,154,0,.1)}
+.lab-verdict.bad{border-color:#d34a3a;background:rgba(211,74,58,.08)}
+
+.lab-checks{display:flex;flex-direction:column;gap:2px}
+.lab-check{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.82rem}
+.lab-check:last-child{border-bottom:0}
+.lab-check .nm{font-weight:650}
+.lab-check .vl{font-variant-numeric:tabular-nums;color:var(--ink-2);text-align:right}
+.lab-check .nt{grid-column:1/-1;color:var(--muted);font-size:.74rem;line-height:1.5}
+.lab-check .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.lab-check.ok .dot{background:#1f9d55}.lab-check.warn .dot{background:#d99a00}.lab-check.bad .dot{background:#d34a3a}
+
+.lab-ref{max-width:1180px;margin:0 auto 60px;padding:0 24px}
+.lab-ref table{width:100%;border-collapse:collapse;font-size:.84rem}
+.lab-ref th,.lab-ref td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
+.lab-ref th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.lab-ref td.num{font-variant-numeric:tabular-nums}
+.lab-note{color:var(--muted);font-size:.76rem;line-height:1.7;margin-top:10px}
+@media(max-width:520px){.lab-fields{grid-template-columns:1fr}}
+
+@media(max-width:760px){.lab-ref{margin-bottom:96px}}
+
 </style>
 </head>
 <body>
@@ -618,6 +681,7 @@ html[data-theme="dark"] .lesson-row.today{background:rgba(255,214,0,.10)}
       <a href="#/home" data-nav="home">首页</a>
       <a href="#/plan" data-nav="plan">课程表</a>
       <a href="#/method" data-nav="method">学习法</a>
+      <a href="#/lab" data-nav="lab">3D 实验室</a>
     </nav>
 
     <div class="hdr-right">
@@ -651,6 +715,10 @@ html[data-theme="dark"] .lesson-row.today{background:rgba(255,214,0,.10)}
   <a href="#/method" data-nav="method">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     <span>学习法</span>
+  </a>
+  <a href="#/lab" data-nav="lab">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 8v8l9 5 9-5V8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m3 8 9 5 9-5M12 13v8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+    <span>实验室</span>
   </a>
 </nav>
 
@@ -1726,6 +1794,554 @@ window.COURSE.content[6] = {
 
 </script>
 <script>
+/* ============ MW 3D 实验室 ============
+   纯 canvas 软件渲染（无第三方库），可离线运行。
+   物理模型为教学用简化估算，误差 ±20%~30%，不替代 MW 官方选型。 */
+(function () {
+  "use strict";
+
+  var state = {
+    model: "bellows",
+    yaw: 0.95, pitch: 0.3, zoom: 1, auto: true,
+    drag: null,
+    params: {
+      od: 50, wall: 0.2, waveH: 4, waves: 8, len: 40, stroke: 6,
+      pressure: 1, vacuum: false, medium: "gas-inert", temp: 25, cycles: 1000000,
+      wire: 1.5, meanD: 20, coils: 8, load: 50,
+      cOd: 30, cLen: 40, bore: 10, torque: 5, misalign: 0.2, rpm: 3000
+    }
+  };
+
+  var MAT = {
+    "304": { name: "304 不锈钢", E: 193000, tmax: 400, corr: 1 },
+    "316L": { name: "316L 不锈钢", E: 193000, tmax: 450, corr: 2 },
+    "321": { name: "321 不锈钢", E: 193000, tmax: 500, corr: 2 },
+    "625": { name: "Inconel 625", E: 208000, tmax: 815, corr: 3 },
+    "718": { name: "Inconel 718", E: 200000, tmax: 650, corr: 3 }
+  };
+
+  var CANVAS = null, CTX = null, MESH = null, RAF = 0, RES = null;
+
+  /* ---------- 工具 ---------- */
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function num(id) { var el = document.getElementById(id); return el ? parseFloat(el.value) || 0 : 0; }
+  function fmt(v, d) { return Number(v).toLocaleString("zh-CN", { maximumFractionDigits: d == null ? 1 : d }); }
+
+  /* ---------- 材质选择 ---------- */
+  function pickMaterial(temp, medium) {
+    var corrosive = medium.indexOf("corr") >= 0;
+    if (temp > 500) return { key: "625", why: "温度超过 500°C，普通不锈钢会软化并氧化，需镍基合金。" };
+    if (corrosive && temp > 300) return { key: "625", why: "腐蚀性介质 + 高温，316L 会点蚀，需镍基合金。" };
+    if (corrosive) return { key: "316L", why: "腐蚀性介质，至少 316L；含氯高时建议 Inconel。" };
+    if (temp > 400) return { key: "321", why: "高温但无腐蚀，321 的钛稳定化可抑制晶间腐蚀。" };
+    return { key: "304", why: "常规气体、常温，304 足够；有凝露风险时升到 316L。" };
+  }
+
+  /* ---------- 波纹管物理 ---------- */
+  function calcBellows(p) {
+    var R = p.od / 2;
+    var Dm = Math.max(p.od - 2 * p.wall, 1);
+    var A = Math.PI / 4 * Dm * Dm;                 // 有效面积 mm²
+    var pMPa = p.pressure * 0.1;                    // bar → MPa
+    var F = pMPa * A;                               // 推力 N
+    var mat = pickMaterial(p.temp, p.medium);
+    var E = MAT[mat.key].E;
+    var nu = 0.3;
+    var h = Math.max(p.waveH, 0.5);
+    var n = Math.max(p.waves, 1);
+    var k = 2 * Math.PI * R * (E * Math.pow(p.wall, 3)) / (12 * (1 - nu * nu) * Math.pow(h, 3) * n); // N/mm
+    var xp = k > 0 ? F / k : 0;                     // 压力产生的位移
+    var total = p.stroke + xp;
+    var ratio = p.len > 0 ? total / p.len : 9;
+    var ld = p.od > 0 ? p.len / p.od : 9;
+    var pcr = 2 * E / (1 - nu * nu) * Math.pow(p.wall / (2 * R), 3); // MPa 外压临界
+    var strain = (p.wall / (2 * R)) * (total / (n * h));
+    var life = strain > 0 ? 1e6 * Math.pow(0.0015 / strain, 3.5) : 1e9;
+
+    var checks = [];
+    checks.push(chk("行程比 Δx / L₀", fmt(ratio * 100, 1) + "%", "≤ 40%",
+      ratio <= 0.4 ? "ok" : ratio <= 0.6 ? "warn" : "bad",
+      "超过 40% 后刚度快速非线性上升，寿命骤降；超过 60% 基本不可用。"));
+    checks.push(chk("长径比 L₀ / D", fmt(ld, 2), p.vacuum ? "≤ 3.0（真空）" : "≤ 4.0",
+      ld <= (p.vacuum ? 3 : 4) ? "ok" : ld <= (p.vacuum ? 3.6 : 5) ? "warn" : "bad",
+      "外压工况下长径比过大容易侧弯失稳，加导杆或缩短单段长度。"));
+
+    if (p.vacuum) {
+      checks.push(chk("外压失稳 p_cr", fmt(pcr, 3) + " MPa", "≥ 0.10 MPa",
+        pcr >= 0.1 ? "ok" : pcr >= 0.07 ? "warn" : "bad",
+        "真空相当于 0.1 MPa 外压，壁厚不足会被吸瘪；p_cr 随壁厚三次方上升。"));
+    }
+
+    checks.push(chk("估算寿命", life > 1e8 ? "＞1 亿次" : fmt(life, 0) + " 次", "≥ " + fmt(p.cycles, 0) + " 次",
+      life >= p.cycles ? "ok" : life >= p.cycles * 0.5 ? "warn" : "bad",
+      "按 Coffin-Manson 简化式估算，仅用于判断量级；正式寿命需样品试验。"));
+
+    checks.push(chk("材料耐温", MAT[mat.key].name + " · " + MAT[mat.key].tmax + "°C", "≥ " + p.temp + "°C",
+      p.temp <= MAT[mat.key].tmax ? "ok" : "bad", mat.why));
+
+    var needCorr = p.medium.indexOf("corr") >= 0 ? 2 : 1;
+    checks.push(chk("介质兼容", MAT[mat.key].name, needCorr === 2 ? "≥ 316L" : "304 起",
+      MAT[mat.key].corr >= needCorr ? "ok" : "bad",
+      needCorr === 2 ? "腐蚀性介质需 316L 及以上；含氯离子时建议 Inconel。" : "无腐蚀介质，304/316L 均可。"));
+
+    var worst = checks.some(function (c) { return c.st === "bad"; }) ? "bad"
+      : checks.some(function (c) { return c.st === "warn"; }) ? "warn" : "ok";
+
+    return {
+      checks: checks, verdict: worst, material: { name: MAT[mat.key].name, key: mat.key, why: mat.why },
+      metrics: {
+        A: A, F: F, k: k, xp: xp, total: total, ratio: ratio, ld: ld, pcr: pcr, strain: strain
+      }
+    };
+  }
+
+  function chk(name, val, limit, st, note) {
+    return { name: name, val: val, limit: limit, st: st, note: note };
+  }
+
+  /* ---------- 弹簧物理 ---------- */
+  function calcSpring(p) {
+    var d = Math.max(p.wire, 0.1), D = Math.max(p.meanD, d * 1.5), n = Math.max(p.coils, 1);
+    var C = D / d;
+    var Kw = (4 * C - 1) / (4 * C - 4) + 0.615 / C;
+    var G = 79000;
+    var k = G * Math.pow(d, 4) / (8 * Math.pow(D, 3) * n);
+    var tau = 8 * p.load * D / (Math.PI * Math.pow(d, 3)) * Kw;
+    var sut = 1800;
+    var ld = p.len / D;
+    var mat = pickMaterial(p.temp, p.medium);
+    var checks = [];
+    checks.push(chk("旋绕比 C = D/d", fmt(C, 2), "4 – 12", C >= 4 && C <= 12 ? "ok" : C >= 3.5 && C <= 14 ? "warn" : "bad",
+      "C 太小难卷制、应力集中；太大弹簧易颤、尺寸失控。"));
+    checks.push(chk("剪切应力 τ", fmt(tau, 0) + " MPa", "≤ " + fmt(0.45 * sut, 0) + " MPa",
+      tau <= 0.45 * sut ? "ok" : tau <= 0.55 * sut ? "warn" : "bad",
+      "含 Wahl 修正；超过 45% 抗拉强度后疲劳寿命快速下降。"));
+    checks.push(chk("长径比 L₀ / D", fmt(ld, 2), "≤ 2.6", ld <= 2.6 ? "ok" : ld <= 3.2 ? "warn" : "bad",
+      "超过 2.6 需导杆或导向套，否则压缩时侧弯。"));
+    checks.push(chk("刚度 k", fmt(k, 2) + " N/mm", "—", "ok", "k = G·d⁴ / (8·D³·n)。"));
+    checks.push(chk("材料耐温", MAT[mat.key].name, "≥ " + p.temp + "°C",
+      p.temp <= MAT[mat.key].tmax ? "ok" : "bad", mat.why));
+    var worst = checks.some(function (c) { return c.st === "bad"; }) ? "bad"
+      : checks.some(function (c) { return c.st === "warn"; }) ? "warn" : "ok";
+    return { checks: checks, verdict: worst, material: { name: MAT[mat.key].name, key: mat.key, why: mat.why }, metrics: { k: k, tau: tau, C: C, ld: ld } };
+  }
+
+  /* ---------- 联轴器物理 ---------- */
+  function calcCoupling(p) {
+    var Ro = p.cOd / 2, Ri = p.bore / 2;
+    var J = Math.PI / 32 * (Math.pow(p.cOd, 4) - Math.pow(p.bore, 4));
+    var tauAllow = 150; // MPa，铝合金 7075 量级
+    var Tcap = 0.12 * tauAllow * J / Ro / 1000; // 螺旋切槽削弱后按 12% 折算
+    var checks = [];
+    checks.push(chk("额定扭矩（估算）", fmt(Tcap, 1) + " N·m", "≥ " + fmt(p.torque, 1) + " N·m",
+      Tcap >= p.torque ? "ok" : Tcap >= p.torque * 0.8 ? "warn" : "bad",
+      "按 τ_allow·J/R 估算，安全系数未计入；冲击载荷要再打折。"));
+    checks.push(chk("径向偏差", fmt(p.misalign, 2) + " mm", "≤ 0.3 mm",
+      p.misalign <= 0.3 ? "ok" : p.misalign <= 0.5 ? "warn" : "bad",
+      "螺旋联轴器的补偿能力有限，超差会让轴承承受附加载荷。"));
+    checks.push(chk("转速", fmt(p.rpm, 0) + " rpm", "≤ 10,000 rpm",
+      p.rpm <= 10000 ? "ok" : p.rpm <= 15000 ? "warn" : "bad",
+      "高速要校核临界转速与动平衡。"));
+    checks.push(chk("壁厚 (OD−bore)/2", fmt((p.cOd - p.bore) / 2, 2) + " mm", "≥ 2 mm",
+      (p.cOd - p.bore) / 2 >= 2 ? "ok" : "warn", "壁太薄会降低扭转刚度并增加加工变形。"));
+    var worst = checks.some(function (c) { return c.st === "bad"; }) ? "bad"
+      : checks.some(function (c) { return c.st === "warn"; }) ? "warn" : "ok";
+    return { checks: checks, verdict: worst, material: { name: "7075 铝合金", why: "" }, metrics: { Tcap: Tcap, J: J } };
+  }
+
+  function val(id, fb) {
+    var el = document.getElementById(id);
+    if (!el) return fb;
+    var v = parseFloat(el.value);
+    return isNaN(v) ? fb : v;
+  }
+  function sel(id, fb) {
+    var el = document.getElementById(id);
+    return el ? el.value : fb;
+  }
+
+  function calc() {
+    var p = state.params;
+    if (state.model === "bellows") {
+      p.od = val("f_od", p.od); p.wall = val("f_wall", p.wall); p.waveH = val("f_waveH", p.waveH);
+      p.waves = val("f_waves", p.waves); p.len = val("f_len", p.len); p.stroke = val("f_stroke", p.stroke);
+      p.pressure = val("f_pressure", p.pressure); p.temp = val("f_temp", p.temp); p.cycles = val("f_cycles", p.cycles);
+      p.vacuum = sel("f_vacuum", "0") === "1";
+      p.medium = sel("f_medium", "gas-inert");
+      return calcBellows(p);
+    }
+    if (state.model === "spring") {
+      p.wire = val("f_wire", p.wire); p.meanD = val("f_meanD", p.meanD); p.coils = val("f_coils", p.coils);
+      p.len = val("f_len", p.len); p.load = val("f_load", p.load); p.temp = val("f_temp", p.temp);
+      p.medium = sel("f_medium", "gas-inert");
+      return calcSpring(p);
+    }
+    p.cOd = val("f_cOd", p.cOd); p.cLen = val("f_cLen", p.cLen); p.bore = val("f_bore", p.bore);
+    p.torque = val("f_torque", p.torque); p.misalign = val("f_misalign", p.misalign); p.rpm = val("f_rpm", p.rpm);
+    return calcCoupling(p);
+  }
+
+  /* ---------- 网格 ---------- */
+  function meshBellows(p) {
+    var R = p.od / 2, h = Math.max(p.waveH, 0.5), n = Math.max(p.waves, 1);
+    var comp = clamp(p.stroke / Math.max(p.len, 1), 0, 0.55);
+    var L = p.len * (1 - comp);
+    var rings = Math.max(40, n * 8), segs = 44;
+    var verts = [], faces = [];
+    for (var i = 0; i <= rings; i++) {
+      var t = i / rings;
+      var z = t * L - L / 2;
+      var r = R - h * (0.5 - 0.5 * Math.cos(2 * Math.PI * n * t));
+      for (var j = 0; j < segs; j++) {
+        var a = j / segs * Math.PI * 2;
+        verts.push([Math.cos(a) * r, Math.sin(a) * r, z]);
+      }
+    }
+    for (var i2 = 0; i2 < rings; i2++) {
+      for (var j2 = 0; j2 < segs; j2++) {
+        var a0 = i2 * segs + j2, b0 = i2 * segs + (j2 + 1) % segs;
+        var c0 = (i2 + 1) * segs + (j2 + 1) % segs, d0 = (i2 + 1) * segs + j2;
+        faces.push({ v: [a0, b0, c0, d0], c: [176, 186, 199] });
+      }
+    }
+    // 两端法兰
+    [[-L / 2 - 2.5, 2.5], [L / 2, 2.5]].forEach(function (f) {
+      var base = verts.length, r2 = R * 1.12;
+      for (var k = 0; k < segs; k++) {
+        var a = k / segs * Math.PI * 2;
+        verts.push([Math.cos(a) * r2, Math.sin(a) * r2, f[0]]);
+        verts.push([Math.cos(a) * r2, Math.sin(a) * r2, f[0] + f[1]]);
+      }
+      for (var k2 = 0; k2 < segs; k2++) {
+        var i0 = base + k2 * 2, i1 = base + ((k2 + 1) % segs) * 2;
+        faces.push({ v: [i0, i1, i1 + 1, i0 + 1], c: [120, 132, 148] });
+      }
+    });
+    // 两端封盖（避免看穿）
+    [-L / 2, L / 2].forEach(function (z) {
+      var c0 = verts.length;
+      verts.push([0, 0, z]);
+      var r0 = R * 0.98, b0 = verts.length;
+      for (var k = 0; k < segs; k++) {
+        var a = k / segs * Math.PI * 2;
+        verts.push([Math.cos(a) * r0, Math.sin(a) * r0, z]);
+      }
+      for (var k2 = 0; k2 < segs; k2++) {
+        faces.push({ v: [c0, b0 + k2, b0 + (k2 + 1) % segs], c: [70, 80, 94] });
+      }
+    });
+    return { verts: verts, faces: faces };
+  }
+
+  function meshSpring(p) {
+    var R = p.meanD / 2, wr = Math.max(p.wire / 2, 0.3), L = p.len;
+    var turns = Math.max(p.coils, 1);
+    var along = Math.round(turns * 20), around = 8;
+    var verts = [], faces = [];
+    for (var i = 0; i <= along; i++) {
+      var t = i / along, ang = t * turns * Math.PI * 2, z = t * L - L / 2;
+      var cx = Math.cos(ang) * R, cy = Math.sin(ang) * R;
+      var rx = Math.cos(ang), ry = Math.sin(ang);
+      for (var j = 0; j < around; j++) {
+        var a = j / around * Math.PI * 2;
+        verts.push([cx + Math.cos(a) * wr * rx, cy + Math.cos(a) * wr * ry, z + Math.sin(a) * wr]);
+      }
+    }
+    for (var i2 = 0; i2 < along; i2++) {
+      for (var j2 = 0; j2 < around; j2++) {
+        var a0 = i2 * around + j2, b0 = i2 * around + (j2 + 1) % around;
+        var c0 = (i2 + 1) * around + (j2 + 1) % around, d0 = (i2 + 1) * around + j2;
+        faces.push({ v: [a0, b0, c0, d0], c: [198, 204, 214] });
+      }
+    }
+    return { verts: verts, faces: faces };
+  }
+
+  function meshCoupling(p) {
+    var R = p.cOd / 2, L = p.cLen, segs = 72, rings = 30;
+    var verts = [], faces = [];
+    for (var i = 0; i <= rings; i++) {
+      var t = i / rings, z = t * L - L / 2;
+      for (var j = 0; j < segs; j++) {
+        var a = j / segs * Math.PI * 2;
+        verts.push([Math.cos(a) * R, Math.sin(a) * R, z]);
+      }
+    }
+    for (var i2 = 0; i2 < rings; i2++) {
+      for (var j2 = 0; j2 < segs; j2++) {
+        var a0 = i2 * segs + j2, b0 = i2 * segs + (j2 + 1) % segs;
+        var c0 = (i2 + 1) * segs + (j2 + 1) % segs, d0 = (i2 + 1) * segs + j2;
+        var ang = j2 / segs;
+        var phase = ((ang * 2 + i2 / rings) % 1);
+        var dark = phase < 0.05 || phase > 0.95;
+        faces.push({ v: [a0, b0, c0, d0], c: dark ? [44, 56, 72] : [190, 196, 205] });
+      }
+    }
+    return { verts: verts, faces: faces };
+  }
+
+  function buildMesh() {
+    var p = state.params;
+    if (state.model === "bellows") MESH = meshBellows(p);
+    else if (state.model === "spring") MESH = meshSpring(p);
+    else MESH = meshCoupling(p);
+  }
+
+  /* ---------- 渲染 ---------- */
+  function rot(p) {
+    var x = p[0], y = p[1], z = p[2];
+    var cy = Math.cos(state.yaw), sy = Math.sin(state.yaw);
+    var x1 = x * cy + z * sy;
+    var z1 = -x * sy + z * cy;
+    var cp = Math.cos(state.pitch), sp = Math.sin(state.pitch);
+    var y1 = y * cp - z1 * sp;
+    var z2 = y * sp + z1 * cp;
+    return [x1, y1, z2];
+  }
+
+  function draw() {
+    if (!CTX || !MESH) return;
+    var W = CANVAS.clientWidth, H = CANVAS.clientHeight;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (CANVAS.width !== Math.round(W * dpr) || CANVAS.height !== Math.round(H * dpr)) {
+      CANVAS.width = Math.round(W * dpr); CANVAS.height = Math.round(H * dpr);
+    }
+    CTX.setTransform(dpr, 0, 0, dpr, 0, 0);
+    CTX.clearRect(0, 0, W, H);
+
+    // 归一化尺寸，保证任何参数下都在视野内
+    var maxR = 1;
+    MESH.verts.forEach(function (v) { maxR = Math.max(maxR, Math.abs(v[0]), Math.abs(v[1]), Math.abs(v[2])); });
+    var scale = Math.min(W, H) * 0.34 / maxR;
+    var cx = W / 2, cy = H / 2 + 6;
+    var camD = maxR * 3.2;
+
+    var view = MESH.verts.map(rot);
+    var proj = view.map(function (v) {
+      var f = clamp(camD / (camD - v[2]), 0.55, 2.4);
+      return [cx + v[0] * scale * f * state.zoom, cy - v[1] * scale * f * state.zoom, v[2]];
+    });
+
+    var light = [0.35, 0.6, 0.85];
+    var ln = Math.sqrt(light[0] * light[0] + light[1] * light[1] + light[2] * light[2]);
+    light = light.map(function (x) { return x / ln; });
+
+    var faces = [];
+    MESH.faces.forEach(function (f) {
+      var a = view[f.v[0]], b = view[f.v[1]], c = view[f.v[2]];
+      var u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+      var w = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+      var n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
+      var nl = Math.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]) || 1;
+      n = [n[0] / nl, n[1] / nl, n[2] / nl];
+      if (n[2] < -0.02) return; // 背面剔除
+      var shade = 0.42 + 0.58 * Math.max(0, n[0] * light[0] + n[1] * light[1] + n[2] * light[2]);
+      var depth = (a[2] + b[2] + c[2]) / 3;
+      faces.push({ p: f.v.map(function (i) { return proj[i]; }), col: f.c, shade: shade, depth: depth });
+    });
+    faces.sort(function (a, b) { return a.depth - b.depth; });
+
+    faces.forEach(function (f) {
+      var col = "rgb(" + Math.round(f.col[0] * f.shade) + "," + Math.round(f.col[1] * f.shade) + "," + Math.round(f.col[2] * f.shade) + ")";
+      CTX.beginPath();
+      CTX.moveTo(f.p[0][0], f.p[0][1]);
+      for (var i = 1; i < f.p.length; i++) CTX.lineTo(f.p[i][0], f.p[i][1]);
+      CTX.closePath();
+      CTX.fillStyle = col;
+      CTX.fill();
+      CTX.strokeStyle = col;
+      CTX.lineWidth = 0.6;
+      CTX.stroke();
+    });
+  }
+
+  function loop() {
+    if (state.auto && !state.drag) state.yaw += 0.004;
+    draw();
+    RAF = requestAnimationFrame(loop);
+  }
+
+  /* ---------- 视图 ---------- */
+  function fieldsBellows() {
+    return '' +
+      '<label>外径 D<span><input id="f_od" type="number" step="1" min="5" value="50"> mm</span></label>' +
+      '<label>壁厚 t<span><input id="f_wall" type="number" step="0.01" min="0.02" value="0.2"> mm</span></label>' +
+      '<label>波高 h<span><input id="f_waveH" type="number" step="0.5" min="0.5" value="4"> mm</span></label>' +
+      '<label>波纹数 n<span><input id="f_waves" type="number" step="1" min="1" value="8"> 个</span></label>' +
+      '<label>自由长度 L₀<span><input id="f_len" type="number" step="1" min="5" value="40"> mm</span></label>' +
+      '<label>工作行程<span><input id="f_stroke" type="number" step="0.5" min="0" value="6"> mm</span></label>' +
+      '<label>工作压力<span><input id="f_pressure" type="number" step="0.1" min="0" value="1"> bar</span></label>' +
+      '<label>温度<span><input id="f_temp" type="number" step="5" value="25"> °C</span></label>' +
+      '<label>介质<select id="f_medium">' +
+      '<option value="gas-inert">气体 · 无腐蚀</option>' +
+      '<option value="gas-corr">气体 · 腐蚀性</option>' +
+      '<option value="liquid-inert">液体 · 无腐蚀</option>' +
+      '<option value="liquid-corr">液体 · 腐蚀性</option></select></label>' +
+      '<label>工况<select id="f_vacuum"><option value="0">内压 / 常压</option><option value="1">真空（外压）</option></select></label>' +
+      '<label class="wide">目标循环次数<input id="f_cycles" type="number" step="100000" min="1000" value="1000000"></label>';
+  }
+
+  function fieldsSpring() {
+    return '' +
+      '<label>线径 d<span><input id="f_wire" type="number" step="0.1" min="0.2" value="2"> mm</span></label>' +
+      '<label>中径 D<span><input id="f_meanD" type="number" step="1" min="3" value="20"> mm</span></label>' +
+      '<label>有效圈数 n<span><input id="f_coils" type="number" step="1" min="1" value="8"> 圈</span></label>' +
+      '<label>自由长度 L₀<span><input id="f_len" type="number" step="1" min="5" value="60"> mm</span></label>' +
+      '<label>工作载荷 F<span><input id="f_load" type="number" step="1" min="0" value="50"> N</span></label>' +
+      '<label>温度<span><input id="f_temp" type="number" step="5" value="25"> °C</span></label>' +
+      '<label class="wide">介质<select id="f_medium">' +
+      '<option value="gas-inert">气体 · 无腐蚀</option><option value="gas-corr">气体 · 腐蚀性</option>' +
+      '<option value="liquid-inert">液体 · 无腐蚀</option><option value="liquid-corr">液体 · 腐蚀性</option></select></label>';
+  }
+
+  function fieldsCoupling() {
+    return '' +
+      '<label>外径<span><input id="f_cOd" type="number" step="1" min="5" value="30"> mm</span></label>' +
+      '<label>长度<span><input id="f_cLen" type="number" step="1" min="10" value="40"> mm</span></label>' +
+      '<label>孔径<span><input id="f_bore" type="number" step="1" min="2" value="10"> mm</span></label>' +
+      '<label>扭矩<span><input id="f_torque" type="number" step="0.5" min="0" value="5"> N·m</span></label>' +
+      '<label>径向偏差<span><input id="f_misalign" type="number" step="0.05" min="0" value="0.2"> mm</span></label>' +
+      '<label>转速<span><input id="f_rpm" type="number" step="100" min="0" value="3000"> rpm</span></label>';
+  }
+
+  function view() {
+    return '' +
+      '<div class="lab-head">' +
+        '<span class="lab-badge">3D LAB · 交互实验</span>' +
+        '<h1>把参数拧一拧，看设计会不会垮</h1>' +
+        '<p>左边是真实比例的 3D 模型：拖动旋转、滚轮缩放。右边改参数，模型会跟着变形，判定会实时更新。所有计算都是<b>教学用简化模型</b>，用来建立直觉，不是官方选型结论。</p>' +
+      '</div>' +
+      '<div class="lab-grid">' +
+        '<div>' +
+          '<div class="lab-stage">' +
+            '<div class="lab-tabs">' +
+              '<button type="button" data-model="bellows" class="on">波纹管</button>' +
+              '<button type="button" data-model="spring">压缩弹簧</button>' +
+              '<button type="button" data-model="coupling">联轴器</button>' +
+            '</div>' +
+            '<div class="lab-canvas-wrap">' +
+              '<canvas id="labCanvas" aria-label="三维模型，可拖动旋转"></canvas>' +
+              '<div class="lab-hud" id="labHud"></div>' +
+              '<div class="lab-tip">拖动旋转 · 滚轮缩放</div>' +
+            '</div>' +
+            '<div class="lab-legend"><span><i class="ok"></i>满足</span><span><i class="warn"></i>临界</span><span><i class="bad"></i>不满足</span><span style="margin-left:auto">鼠标拖动旋转，双击复位</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<aside class="lab-panel">' +
+          '<div class="lab-card"><h2>几何与工况</h2><div class="lab-fields" id="labFields"></div></div>' +
+          '<div class="lab-verdict" id="labVerdict"></div>' +
+          '<div class="lab-card"><h2>指标校核</h2><div class="lab-checks" id="labChecks"></div></div>' +
+        '</aside>' +
+      '</div>' +
+      '<section class="lab-ref">' +
+        '<h2 style="font-size:1rem;margin:0 0 10px">怎么读这张表</h2>' +
+        '<table><thead><tr><th>指标</th><th>本工具判定线</th><th>为什么</th></tr></thead><tbody>' +
+          '<tr><td>行程比</td><td class="num">≤ 40%</td><td>超过 40% 刚度非线性上升，寿命快速下降</td></tr>' +
+          '<tr><td>长径比（真空）</td><td class="num">≤ 3.0</td><td>外压工况下过长会侧弯失稳，而不是被压短</td></tr>' +
+          '<tr><td>外压失稳</td><td class="num">p_cr ≥ 0.10 MPa</td><td>真空相当于 0.1 MPa 外压，壁厚不足会吸瘪</td></tr>' +
+          '<tr><td>弹簧旋绕比</td><td class="num">4 – 12</td><td>太小难卷制，太大易颤、尺寸失控</td></tr>' +
+          '<tr><td>弹簧应力</td><td class="num">τ ≤ 0.45 σ<sub>uts</sub></td><td>超过后疲劳寿命急剧缩短</td></tr>' +
+        '</tbody></table>' +
+        '<p class="lab-note">说明：模型采用简化公式（波纹管刚度按环板弯曲近似，寿命按 Coffin-Manson 量级估计，联轴器按 τ·J/R 估算），结果只用于教学与快速判断方向。正式选型必须以 MW 官方样本、有限元分析与样品试验为准。</p>' +
+      '</section>';
+  }
+
+  /* ---------- 初始化 ---------- */
+  function renderFields() {
+    var box = document.getElementById("labFields");
+    if (!box) return;
+    if (state.model === "bellows") box.innerHTML = fieldsBellows();
+    else if (state.model === "spring") box.innerHTML = fieldsSpring();
+    else box.innerHTML = fieldsCoupling();
+    Array.prototype.forEach.call(box.querySelectorAll("input,select"), function (el) {
+      el.addEventListener("input", update);
+      el.addEventListener("change", update);
+    });
+  }
+
+  function update() {
+    RES = calc();
+    buildMesh();
+    renderResult();
+  }
+
+  function renderResult() {
+    var v = document.getElementById("labVerdict");
+    var c = document.getElementById("labChecks");
+    var hud = document.getElementById("labHud");
+    if (!v || !c) return;
+    var map = { ok: ["通过", "设计在当前指标下可行"], warn: ["有风险", "部分指标接近边界，需要确认"], bad: ["不满足", "至少一项指标超限，必须改设计"] };
+    var t = map[RES.verdict];
+    v.className = "lab-verdict " + RES.verdict;
+    v.innerHTML = "<b>" + t[0] + "</b><p>" + t[1] + "。推荐材料：" + RES.material.name + "。</p>";
+    c.innerHTML = RES.checks.map(function (k) {
+      return '<div class="lab-check ' + k.st + '">' +
+        '<span class="nm"><i class="dot"></i>' + k.name + "</span>" +
+        '<span class="vl">' + k.val + " / " + k.limit + "</span>" +
+        '<span class="nt">' + k.note + "</span></div>";
+    }).join("");
+
+    if (state.model === "bellows") {
+      hud.innerHTML = "<span>推力 " + fmt(RES.metrics.F, 1) + " N</span>" +
+        "<span>A_eff " + fmt(RES.metrics.A, 0) + " mm²</span>" +
+        "<span>k " + fmt(RES.metrics.k, 2) + " N/mm</span>";
+    } else if (state.model === "spring") {
+      hud.innerHTML = "<span>k " + fmt(RES.metrics.k, 2) + " N/mm</span><span>τ " + fmt(RES.metrics.tau, 0) + " MPa</span><span>C " + fmt(RES.metrics.C, 1) + "</span>";
+    } else {
+      hud.innerHTML = "<span>额定 " + fmt(RES.metrics.Tcap, 1) + " N·m</span><span>J " + fmt(RES.metrics.J, 0) + " mm⁴</span>";
+    }
+  }
+
+  function bindCanvas() {
+    var wrap = CANVAS.parentNode;
+    var start = null, last = null;
+    CANVAS.addEventListener("pointerdown", function (e) {
+      state.drag = true; start = { x: e.clientX, y: e.clientY };
+      CANVAS.setPointerCapture(e.pointerId);
+    });
+    CANVAS.addEventListener("pointermove", function (e) {
+      if (!state.drag || !start) return;
+      state.yaw += (e.clientX - start.x) * 0.008;
+      state.pitch = clamp(state.pitch + (e.clientY - start.y) * 0.006, -1.4, 1.4);
+      start = { x: e.clientX, y: e.clientY };
+    });
+    window.addEventListener("pointerup", function () { state.drag = false; start = null; });
+    CANVAS.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      state.zoom = clamp(state.zoom * (e.deltaY > 0 ? 0.94 : 1.06), 0.5, 2.4);
+    }, { passive: false });
+    CANVAS.addEventListener("dblclick", function () {
+      state.yaw = 0.65; state.pitch = -0.42; state.zoom = 1; state.auto = true;
+    });
+    wrap.addEventListener("pointerdown", function () { state.auto = false; });
+  }
+
+  function init() {
+    var tabs = document.querySelectorAll("[data-model]");
+    Array.prototype.forEach.call(tabs, function (b) {
+      b.addEventListener("click", function () {
+        Array.prototype.forEach.call(tabs, function (x) { x.classList.toggle("on", x === b); });
+        state.model = b.getAttribute("data-model");
+        renderFields();
+        update();
+      });
+    });
+    CANVAS = document.getElementById("labCanvas");
+    if (!CANVAS) return;
+    CTX = CANVAS.getContext("2d");
+    CANVAS.width = 800; CANVAS.height = 600;
+    bindCanvas();
+    renderFields();
+    update();
+    cancelAnimationFrame(RAF);
+    loop();
+  }
+
+  window.LAB = { view: view, init: init };
+})();
+
+</script>
+<script>
 /* ============================================================
    MW 销售工程师训练营 · 站点逻辑
    无依赖、无构建、file:// 直接打开可用
@@ -2483,10 +3099,12 @@ window.COURSE.content[6] = {
     if (r.name === "lesson") { html = viewLesson(r.arg); }
     else if (r.name === "plan") { html = viewPlan(); }
     else if (r.name === "method") { html = viewMethod(); }
+    else if (r.name === "lab") { html = window.LAB ? LAB.view() : "<p>实验室加载失败</p>"; }
     else { html = viewHome(); }
 
     app.innerHTML = html;
     setActiveNav(r.name === "lesson" ? "plan" : r.name);
+    if (r.name === "lab" && window.LAB) { LAB.init(app); }
 
     if (r.name === "lesson") {
       initWidgets(app);
