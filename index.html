@@ -1909,10 +1909,21 @@ window.COURSE.content[6] = {
     }
   };
 
+  var FAM_EXTRA = {
+    extension: { cat: "spring", brand: "Century Spring", proc: "拉伸弹簧", note: "密圈卷制，带初拉力；钩部是应力集中点，断裂多发生在钩根。", defaults: { wire: 1.5, meanD: 15, coils: 12, len: 70, load: 30, temp: 25, cycles: 100000, endType: "hook", shot: "no" }, allow: 0.42 },
+    torsion: { cat: "spring", brand: "Century Spring", proc: "扭转弹簧", note: "受扭矩，腿型决定力臂；旋向必须与受力方向匹配。", defaults: { wire: 1.2, meanD: 12, coils: 8, len: 30, load: 2, angle: 90, temp: 25, cycles: 100000 }, allow: 0.42 },
+    disc: { cat: "spring", brand: "MW Components", proc: "碟形弹簧", note: "小行程大力值；对合增行程、叠合增力。", defaults: { od: 40, bore: 20, wire: 1.5, meanD: 2, temp: 25, cycles: 100000 }, allow: 0.6 },
+    cforce: { cat: "spring", brand: "MW Components", proc: "恒力弹簧", note: "钢带卷制，展开过程中力近似恒定；按带宽、带厚、卷径选。", defaults: { od: 12, wire: 0.2, coils: 6, len: 200, load: 5, temp: 25 }, allow: 0.5 },
+    screw: { cat: "hardware", brand: "MW Fasteners", proc: "螺栓 / 螺钉", note: "按公称直径与性能等级校核拉伸承载。", defaults: { dia: 6, length: 30, grade: 8.8, load: 5000 }, allow: 0.6 },
+    washer: { cat: "hardware", brand: "MW Fasteners", proc: "垫圈 / 垫片", note: "按承压面积校核，避免压溃或变形。", defaults: { od: 20, bore: 10, t: 2, load: 3000 }, allow: 0.6 }
+  };
+  for (var fk in FAM_EXTRA) FAM[fk] = FAM_EXTRA[fk];
+
   var CATS = [
     { id: "bellows", label: "波纹管", fams: ["ameriflex", "bellowstech", "servometer"] },
-    { id: "spring", label: "弹簧", fams: ["century", "maudlin", "esp", "helical"] },
-    { id: "coupling", label: "联轴器", fams: ["hbeam", "bcouple", "ujoint"] }
+    { id: "spring", label: "弹簧", fams: ["century", "maudlin", "esp", "helical", "extension", "torsion", "disc", "cforce"] },
+    { id: "coupling", label: "联轴器", fams: ["hbeam", "bcouple", "ujoint"] },
+    { id: "hardware", label: "紧固与垫片", fams: ["screw", "washer"] }
   ];
 
   var MAT = {
@@ -2046,7 +2057,70 @@ window.COURSE.content[6] = {
   }
 
   /* ---------------- 弹簧 ---------------- */
+  function calcSpecial(p, f) {
+    var mat = f.cat === "hardware" ? { key: "304", why: "紧固件与垫圈常用不锈钢或碳钢，按 304 估算。" } : pickMaterial(p.temp || 25, "", "spring");
+    var checks = [], metrics = {}, gauges = [];
+    if (f.proc === "拉伸弹簧") {
+      var d = p.wire, D = p.meanD, C = D / d, n = p.coils;
+      var Kw = (4 * C - 1) / (4 * C - 4) + 0.615 / C;
+      var k = 79000 * Math.pow(d, 4) / (8 * Math.pow(D, 3) * n);
+      var tau = 8 * p.load * D / (Math.PI * Math.pow(d, 3)) * Kw;
+      var allow = 0.42 * 1800;
+      metrics = { k: k, tau: tau, C: C };
+      checks.push(chk("旋绕比 C", fmt(C, 2), "4 – 12", C >= 4 && C <= 12 ? "ok" : "warn", "太小难卷制，太大易颤。"));
+      checks.push(chk("簧身应力 τ", fmt(tau, 0) + " MPa", "≤ " + fmt(allow, 0), tau <= allow ? "ok" : "bad", "含 Wahl 修正；钩部还要再折减。"));
+      checks.push(chk("钩部应力", fmt(tau * 1.3, 0) + " MPa", "≤ " + fmt(allow, 0), tau * 1.3 <= allow ? "ok" : "warn", "钩根是应力集中点，按 1.3 倍估算。"));
+      gauges = [{ name: "应力利用率", pct: clamp(tau * 1.3 / allow * 100, 0, 100), st: tau * 1.3 <= allow ? "ok" : "bad", txt: fmt(tau * 1.3 / allow * 100, 0) + "%" }];
+    } else if (f.proc === "扭转弹簧") {
+      var d2 = p.wire, D2 = p.meanD, n2 = p.coils;
+      var kt = 206000 * Math.pow(d2, 4) / (3667 * D2 * n2);
+      var T = p.load;
+      var tau2 = 32 * T / (Math.PI * Math.pow(d2, 3));
+      var allow2 = 0.6 * 1200;
+      metrics = { k: kt, tau: tau2 };
+      checks.push(chk("扭矩刚度", fmt(kt, 2) + " N·mm/°", "—", "ok", "k = E·d⁴/(3667·D·n)，E 取 206 GPa。"));
+      checks.push(chk("弯曲应力 σ", fmt(tau2, 0) + " MPa", "≤ " + fmt(allow2, 0), tau2 <= allow2 ? "ok" : "bad", "扭转弹簧按弯曲应力校核，不是剪切。"));
+      checks.push(chk("角度 / 圈数", fmt((p.angle || 0) / 360, 2) + " 圈", "≤ " + fmt(p.coils * 0.8, 1) + " 圈", (p.angle || 0) / 360 <= p.coils * 0.8 ? "ok" : "warn", "转角过大会使内径收缩、与轴干涉。"));
+      gauges = [{ name: "应力利用率", pct: clamp(tau2 / allow2 * 100, 0, 100), st: tau2 <= allow2 ? "ok" : "bad", txt: fmt(tau2 / allow2 * 100, 0) + "%" }];
+    } else if (f.proc === "碟形弹簧") {
+      var E = 206000, nu = 0.3, Do = p.od, h0 = Math.max(p.meanD, 0.05), t = Math.max(p.wire, 0.05);
+      var kd = 4 * E * Math.pow(t, 3) / (3 * (1 - nu * nu) * Do * Do);
+      var Fmax = kd * h0;
+      var sig = 4 * E * t * h0 / ((1 - nu * nu) * Do * Do);
+      metrics = { k: kd, F: Fmax, tau: sig };
+      checks.push(chk("压平载荷（估算）", fmt(Fmax, 0) + " N", "—", "ok", "按 DIN 2093 简化式，用于判断量级。"));
+      checks.push(chk("压平应力", fmt(sig, 0) + " MPa", "≤ 1200 MPa", sig <= 1200 ? "ok" : "warn", "超过材料屈服后碟簧会塌陷、力值衰减。"));
+      checks.push(chk("h₀/t 比", fmt(h0 / t, 2), "0.6 – 1.4", h0 / t >= 0.6 && h0 / t <= 1.4 ? "ok" : "warn", "比值决定刚度曲线形状；过大易失稳翻转。"));
+      gauges = [{ name: "应力利用率", pct: clamp(sig / 1200 * 100, 0, 100), st: sig <= 1200 ? "ok" : "bad", txt: fmt(sig / 1200 * 100, 0) + "%" }];
+    } else if (f.proc === "恒力弹簧") {
+      var b = p.od || 12, tt = p.wire || 0.2, R0 = 15;
+      var F = 206000 * b * Math.pow(tt, 3) / (12 * R0 * R0);
+      metrics = { F: F };
+      checks.push(chk("展开力（量级）", fmt(F, 2) + " N", "≈ " + fmt(p.load, 1) + " N", Math.abs(F - p.load) / Math.max(p.load, 1) < 0.3 ? "ok" : "warn", "恒力弹簧力值主要由带厚三次方决定。"));
+      checks.push(chk("带厚 / 带宽", fmt(tt, 2) + " / " + fmt(b, 1) + " mm", "—", "ok", "带太薄易屈曲，太厚卷不动。"));
+      gauges = [{ name: "力值匹配", pct: clamp(p.load / Math.max(F, 0.01) * 100, 0, 100), st: Math.abs(F - p.load) / Math.max(p.load, 1) < 0.3 ? "ok" : "warn", txt: fmt(F, 1) + " N" }];
+    } else if (f.proc === "螺栓 / 螺钉") {
+      var A = Math.PI * p.dia * p.dia / 4;
+      var grades = { "4.6": 400, "8.8": 800, "10.9": 1040, "12.9": 1220 };
+      var sut = grades[String(p.grade)] || 800;
+      var Fallow = A * sut * 0.6;
+      metrics = { A: A, F: Fallow };
+      checks.push(chk("拉伸承载力", fmt(Fallow, 0) + " N", "≥ " + fmt(p.load, 0) + " N", Fallow >= p.load ? "ok" : "bad", "按 0.6σ_uts 计，未考虑螺纹剪切与疲劳。"));
+      checks.push(chk("应力截面积", fmt(A, 1) + " mm²", "—", "ok", "A = πd²/4，实际按公称应力截面积略小。"));
+      gauges = [{ name: "载荷利用率", pct: clamp(p.load / Fallow * 100, 0, 100), st: p.load <= Fallow ? "ok" : "bad", txt: fmt(p.load / Fallow * 100, 0) + "%" }];
+    } else {
+      var Ao = Math.PI * (p.od * p.od - p.bore * p.bore) / 4;
+      var pres = p.load / Ao;
+      metrics = { A: Ao, p: pres };
+      checks.push(chk("承压面积", fmt(Ao, 1) + " mm²", "—", "ok", "A = π(OD²−ID²)/4。"));
+      checks.push(chk("承压应力", fmt(pres, 2) + " MPa", "≤ 300 MPa", pres <= 300 ? "ok" : "warn", "软材料垫圈会压溃；硬垫圈按材料屈服校核。"));
+      gauges = [{ name: "承压利用率", pct: clamp(pres / 300 * 100, 0, 100), st: pres <= 300 ? "ok" : "warn", txt: fmt(pres, 1) + " MPa" }];
+    }
+    return { checks: checks, verdict: worstOf(checks), material: { name: MAT[mat.key].name, key: mat.key, why: mat.why }, metrics: metrics, gauges: gauges };
+  }
+
   function calcSpring(p, f) {
+    if (["拉伸弹簧", "扭转弹簧", "碟形弹簧", "恒力弹簧"].indexOf(f.proc) >= 0) return calcSpecial(p, f);
     var mat = pickMaterial(p.temp, "", "spring");
     var checks = [], metrics = {}, gauges = [];
     if (f.proc === "机加工弹簧") {
@@ -2166,9 +2240,140 @@ function radialRing(verts, r, z, segs) {
     return { verts: verts, faces: faces };
   }
 
+
+  function tubeAlong(pts, rad, sides) {
+    var verts = [], faces = [], n = pts.length;
+    for (var i = 0; i < n; i++) {
+      var a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
+      var tx = b[0] - a[0], ty = b[1] - a[1], tz = b[2] - a[2];
+      var tl = Math.sqrt(tx * tx + ty * ty + tz * tz) || 1;
+      tx /= tl; ty /= tl; tz /= tl;
+      var ux = 0, uy = 0, uz = 1;
+      if (Math.abs(tz) > 0.9) { ux = 1; uz = 0; }
+      var nx = uy * tz - uz * ty, ny = uz * tx - ux * tz, nz = ux * ty - uy * tx;
+      var nl = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+      nx /= nl; ny /= nl; nz /= nl;
+      var bx = ty * nz - tz * ny, by = tz * nx - tx * nz, bz = tx * ny - ty * nx;
+      for (var j = 0; j < sides; j++) {
+        var q = j / sides * 2 * PI;
+        verts.push([pts[i][0] + (nx * Math.cos(q) + bx * Math.sin(q)) * rad,
+                    pts[i][1] + (ny * Math.cos(q) + by * Math.sin(q)) * rad,
+                    pts[i][2] + (nz * Math.cos(q) + bz * Math.sin(q)) * rad]);
+      }
+    }
+    for (var k = 0; k < n - 1; k++) {
+      for (var j2 = 0; j2 < sides; j2++) {
+        var j3 = (j2 + 1) % sides;
+        faces.push({ v: [k * sides + j2, k * sides + j3, (k + 1) * sides + j3, (k + 1) * sides + j2], c: [204, 210, 220] });
+      }
+    }
+    return { verts: verts, faces: faces };
+  }
+
+  function meshHardware(p, f) {
+    var verts = [], faces = [];
+    if (f.proc === "螺栓 / 螺钉") {
+      var R = p.dia / 2, L = p.length, segs = 56;
+      radialRing(verts, R, 0, segs); radialRing(verts, R, L * 0.75, segs);
+      ringFaces(faces, 0, segs, segs, [200, 206, 216]);
+      /* 六角头 */
+      var hh = p.dia * 0.65, hr = R * 1.8;
+      var base = verts.length;
+      for (var h = 0; h < 6; h++) {
+        var a = h / 6 * 2 * PI;
+        verts.push([Math.cos(a) * hr, Math.sin(a) * hr, L * 0.75]);
+        verts.push([Math.cos(a) * hr, Math.sin(a) * hr, L * 0.75 + hh]);
+      }
+      for (var h2 = 0; h2 < 6; h2++) {
+        var h3 = (h2 + 1) % 6;
+        faces.push({ v: [base + h2 * 2, base + h3 * 2, base + h3 * 2 + 1, base + h2 * 2 + 1], c: [190, 198, 210] });
+      }
+      var top = verts.length; verts.push([0, 0, L * 0.75 + hh]);
+      for (var h4 = 0; h4 < 6; h4++) {
+        var h5 = (h4 + 1) % 6;
+        faces.push({ v: [top, base + h4 * 2 + 1, base + h5 * 2 + 1], c: [206, 212, 222] });
+      }
+      /* 螺纹：螺旋线 */
+      var lines = [], pts = [];
+      for (var t = 0; t <= 160; t++) {
+        var tt = t / 160, ang = tt * (L / (p.dia * 0.8)) * 2 * PI;
+        pts.push([Math.cos(ang) * R, Math.sin(ang) * R, tt * L * 0.72]);
+      }
+      lines.push(pts);
+      return { verts: verts, faces: faces, lines: lines };
+    }
+    /* 垫圈 / 垫片 */
+    var Ro = p.od / 2, Ri = p.bore / 2, th = p.t, sg = 48;
+    var z0 = -th / 2, z1 = th / 2;
+    var o0 = radialRing(verts, Ro, z0, sg), o1 = radialRing(verts, Ro, z1, sg);
+    var i0 = radialRing(verts, Ri, z0, sg), i1 = radialRing(verts, Ri, z1, sg);
+    ringFaces(faces, o0, o1, sg, [200, 206, 216]);
+    for (var q = 0; q < sg; q++) {
+      var q2 = (q + 1) % sg;
+      faces.push({ v: [o1 + q, o1 + q2, i1 + q2, i1 + q], c: [212, 218, 228] });
+      faces.push({ v: [o0 + q, i0 + q, i0 + q2, o0 + q2], c: [178, 186, 198] });
+      faces.push({ v: [o1 + q, i1 + q, i1 + q2, o1 + q2], c: [210, 216, 226] });
+    }
+    return { verts: verts, faces: faces };
+  }
+
   /* 弹簧：螺旋线 + 端部封盖；机加工版为带螺旋槽的整体管 */
   function meshSpring(p, f) {
     var verts = [], faces = [];
+    if (f.proc === "拉伸弹簧" || f.proc === "扭转弹簧") {
+      var d = p.wire, R0 = p.meanD / 2, n0 = p.coils, L0 = p.len;
+      var pts = [], steps = Math.round(n0 * 26);
+      for (var i = 0; i < steps; i++) {
+        var t = i / (steps - 1), ang = t * n0 * 2 * PI;
+        pts.push([Math.cos(ang) * R0, Math.sin(ang) * R0, (t - 0.5) * (L0 - 2 * d)]);
+      }
+      if (f.proc === "拉伸弹簧") {
+        var hookA = [], hookB = [];
+        for (var h = 0; h <= 12; h++) {
+          var qa = h / 12 * PI;
+          hookA.push([Math.cos(qa) * R0 * 0.9, -R0 * 0.9 - Math.sin(qa) * R0 * 0.55, -(L0 - 2 * d) / 2]);
+          hookB.push([Math.cos(qa) * R0 * 0.9, R0 * 0.9 + Math.sin(qa) * R0 * 0.55, (L0 - 2 * d) / 2]);
+        }
+        var t1 = tubeAlong(hookA.concat(pts).concat(hookB.reverse()), d / 2, 8);
+        return t1;
+      }
+      var leg1 = [[R0 * 1.05, 0, -(L0 - 2 * d) / 2], [R0 * 1.05 + 6, 0, -(L0 - 2 * d) / 2 - 3]];
+      var leg2 = [[R0 * 1.05, 0, (L0 - 2 * d) / 2], [R0 * 1.05 + 6, 0, (L0 - 2 * d) / 2 + 3]];
+      return tubeAlong(leg1.concat(pts).concat(leg2), d / 2, 8);
+    }
+    if (f.proc === "碟形弹簧") {
+      var Ro = p.od / 2, Ri = p.bore / 2, th = p.wire, cone = p.meanD, sg = 64;
+      for (var c = 0; c < sg; c++) {
+        var a = c / sg * 2 * PI;
+        var oi = [Math.cos(a) * Ri, Math.sin(a) * Ri, cone];
+        var oo = [Math.cos(a) * Ro, Math.sin(a) * Ro, 0];
+        verts.push(oi, oo, [oi[0], oi[1], oi[2] - th], [oo[0], oo[1], -th]);
+      }
+      for (var c2 = 0; c2 < sg; c2++) {
+        var b = c2 * 4, n2 = ((c2 + 1) % sg) * 4;
+        faces.push({ v: [b, b + 1, n2 + 1, n2], c: [212, 218, 228] });
+        faces.push({ v: [b + 2, n2 + 2, n2 + 3, b + 3], c: [186, 194, 206] });
+        faces.push({ v: [b, n2, n2 + 2, b + 2], c: [196, 204, 216] });
+        faces.push({ v: [b + 1, b + 3, n2 + 3, n2 + 1], c: [202, 210, 222] });
+      }
+      return { verts: verts, faces: faces };
+    }
+    if (f.proc === "恒力弹簧") {
+      var b2 = p.od || 12, th2 = p.wire || 0.2, coils = p.coils, rr = 18;
+      var N = 160, pts2 = [];
+      for (var c2 = 0; c2 < N; c2++) {
+        var tt2 = c2 / (N - 1), an = tt2 * coils * 2 * PI;
+        var rad = rr * (1 - 0.55 * tt2);
+        pts2.push([Math.cos(an) * rad, Math.sin(an) * rad, tt2 * p.len * 0.5]);
+      }
+      for (var k = 0; k < N - 1; k++) {
+        var a1 = pts2[k], a2 = pts2[k + 1];
+        var b3 = verts.length;
+        verts.push([a1[0], a1[1], a1[2] + b2 / 2], [a1[0], a1[1], a1[2] - b2 / 2], [a2[0], a2[1], a2[2] + b2 / 2], [a2[0], a2[1], a2[2] - b2 / 2]);
+        faces.push({ v: [b3, b3 + 1, b3 + 3, b3 + 2], c: [200, 206, 216] });
+      }
+      return { verts: verts, faces: faces };
+    }
     if (f.proc === "机加工弹簧") {
       var Ro = p.od / 2, Ri = Math.max(p.bore / 2, 0.5), L = p.len, segs = 72, rings = 48;
       var slotW = 0.05;
@@ -2463,6 +2668,56 @@ function radialRing(verts, r, z, segs) {
   }
 
   function fieldsSpring(p, f) {
+    if (f.proc === "拉伸弹簧") {
+      return '' +
+        '<label>线径 d<span><input id="f_wire" type="number" step="0.05" min="0.1" value="' + p.wire + '"> mm</span></label>' +
+        '<label>中径 D<span><input id="f_meanD" type="number" step="0.5" min="2" value="' + p.meanD + '"> mm</span></label>' +
+        '<label>有效圈数<span><input id="f_coils" type="number" step="1" min="1" value="' + p.coils + '"> 圈</span></label>' +
+        '<label>自由长度<span><input id="f_len" type="number" step="1" min="5" value="' + p.len + '"> mm</span></label>' +
+        '<label>工作载荷<span><input id="f_load" type="number" step="5" min="0" value="' + p.load + '"> N</span></label>' +
+        '<label>温度<span><input id="f_temp" type="number" step="5" value="' + p.temp + '"> °C</span></label>';
+    }
+    if (f.proc === "扭转弹簧") {
+      return '' +
+        '<label>线径 d<span><input id="f_wire" type="number" step="0.05" min="0.1" value="' + p.wire + '"> mm</span></label>' +
+        '<label>中径 D<span><input id="f_meanD" type="number" step="0.5" min="2" value="' + p.meanD + '"> mm</span></label>' +
+        '<label>有效圈数<span><input id="f_coils" type="number" step="1" min="1" value="' + p.coils + '"> 圈</span></label>' +
+        '<label>自由长度<span><input id="f_len" type="number" step="1" min="5" value="' + p.len + '"> mm</span></label>' +
+        '<label>工作扭矩<span><input id="f_load" type="number" step="0.5" min="0" value="' + p.load + '"> N·mm</span></label>' +
+        '<label>工作角度<span><input id="f_angle" type="number" step="5" min="0" value="' + (p.angle || 90) + '"> °</span></label>' +
+        '<label>温度<span><input id="f_temp" type="number" step="5" value="' + p.temp + '"> °C</span></label>';
+    }
+    if (f.proc === "碟形弹簧") {
+      return '' +
+        '<label>外径<span><input id="f_od" type="number" step="1" min="5" value="' + p.od + '"> mm</span></label>' +
+        '<label>内径<span><input id="f_bore" type="number" step="1" min="2" value="' + p.bore + '"> mm</span></label>' +
+        '<label>厚度 t<span><input id="f_wire" type="number" step="0.05" min="0.1" value="' + p.wire + '"> mm</span></label>' +
+        '<label>锥高 h<span><input id="f_meanD" type="number" step="0.1" min="0.2" value="' + p.meanD + '"> mm</span></label>' +
+        '<label>温度<span><input id="f_temp" type="number" step="5" value="' + p.temp + '"> °C</span></label>' +
+        '<label>目标寿命<input id="f_cycles" type="number" step="100000" min="1000" value="' + (p.cycles || 100000) + '"></label>';
+    }
+    if (f.proc === "恒力弹簧") {
+      return '' +
+        '<label>带宽<span><input id="f_od" type="number" step="1" min="2" value="' + (p.od || 12) + '"> mm</span></label>' +
+        '<label>带厚<span><input id="f_wire" type="number" step="0.01" min="0.02" value="' + (p.wire || 0.2) + '"> mm</span></label>' +
+        '<label>展开长度<span><input id="f_len" type="number" step="10" min="20" value="' + p.len + '"> mm</span></label>' +
+        '<label>工作拉力<span><input id="f_load" type="number" step="1" min="0" value="' + p.load + '"> N</span></label>' +
+        '<label>温度<span><input id="f_temp" type="number" step="5" value="' + p.temp + '"> °C</span></label>';
+    }
+    if (f.cat === "hardware") {
+      if (f.proc === "垫圈 / 垫片") {
+        return '' +
+          '<label>外径<span><input id="f_od" type="number" step="1" min="5" value="' + p.od + '"> mm</span></label>' +
+          '<label>内径<span><input id="f_bore" type="number" step="1" min="1" value="' + p.bore + '"> mm</span></label>' +
+          '<label>厚度<span><input id="f_t" type="number" step="0.1" min="0.1" value="' + p.t + '"> mm</span></label>' +
+          '<label>轴向载荷<span><input id="f_load" type="number" step="100" min="0" value="' + p.load + '"> N</span></label>';
+      }
+      return '' +
+        '<label>公称直径<span><input id="f_dia" type="number" step="1" min="2" value="' + p.dia + '"> mm</span></label>' +
+        '<label>长度<span><input id="f_len" type="number" step="1" min="5" value="' + p.length + '"> mm</span></label>' +
+        '<label>性能等级<select id="f_grade">' + opt([{ v: 4.6, t: "4.6" }, { v: 8.8, t: "8.8" }, { v: 10.9, t: "10.9" }, { v: 12.9, t: "12.9" }], p.grade) + "</select></label>" +
+        '<label>预紧力<span><input id="f_load" type="number" step="500" min="0" value="' + p.load + '"> N</span></label>';
+    }
     if (f.proc === "机加工弹簧") {
       return '' +
         '<label>外径<span><input id="f_od" type="number" step="1" min="5" value="' + (p.od || 30) + '"> mm</span></label>' +
@@ -2517,7 +2772,7 @@ function radialRing(verts, r, z, segs) {
       '<div class="lab-head">' +
         '<span class="lab-badge">3D LAB · 交互实验</span>' +
         '<h1>把参数拧一拧，看设计会不会垮</h1>' +
-        '<p>按品牌与工艺拆开看：液压成型、边缘焊接、电铸三种波纹管，Century / Maudlin / ESP / Helical 四类弹簧，螺旋梁、波纹管、万向节三种联轴器。拖动旋转、滚轮缩放，改参数模型实时变形。</p>' +
+        '<p>对照 MW 官网产品分类整理：波纹管 3 类（液压/焊接/电铸）、弹簧 8 类（压缩/精密/定制/机加工/拉伸/扭转/碟形/恒力）、联轴器 3 类（螺旋梁/波纹管/万向节）、紧固与垫片 2 类。拖动旋转、滚轮缩放，改参数模型实时变形。</p>' +
       '</div>' +
       '<div class="lab-grid">' +
         '<div class="lab-stage">' +
@@ -2563,7 +2818,7 @@ function radialRing(verts, r, z, segs) {
     var f = famInfo(), p = params();
     if (!box) return;
     if (f.cat === "bellows") box.innerHTML = fieldsBellows(p);
-    else if (f.cat === "spring") box.innerHTML = fieldsSpring(p, f);
+    else if (f.cat === "spring" || f.cat === "hardware") box.innerHTML = fieldsSpring(p, f);
     else box.innerHTML = fieldsCoupling(p, f);
     Array.prototype.forEach.call(box.querySelectorAll("input,select"), function (el) {
       el.addEventListener("input", update);
@@ -2581,8 +2836,22 @@ function radialRing(verts, r, z, segs) {
       p.layers = val("f_layers", p.layers); p.waveShape = sel("f_waveShape", p.waveShape);
 p.vacuum = sel("f_vacuum", String(p.vacuum)) === "1" ? 1 : 0;
       p.medium = sel("f_medium", p.medium);
+    } else if (f.cat === "hardware") {
+      p.od = val("f_od", p.od); p.bore = val("f_bore", p.bore); p.t = val("f_t", p.t);
+      p.dia = val("f_dia", p.dia); p.length = val("f_len", p.length); p.load = val("f_load", p.load);
+      if (f.proc === "螺栓 / 螺钉") p.grade = sel("f_grade", String(p.grade));
     } else if (f.cat === "spring") {
-      if (f.proc === "机加工弹簧") {
+      if (["拉伸弹簧", "扭转弹簧"].indexOf(f.proc) >= 0) {
+        p.wire = val("f_wire", p.wire); p.meanD = val("f_meanD", p.meanD); p.coils = val("f_coils", p.coils);
+        p.len = val("f_len", p.len); p.load = val("f_load", p.load); p.temp = val("f_temp", p.temp);
+        p.angle = val("f_angle", p.angle);
+      } else if (f.proc === "碟形弹簧") {
+        p.od = val("f_od", p.od); p.bore = val("f_bore", p.bore); p.wire = val("f_wire", p.wire);
+        p.meanD = val("f_meanD", p.meanD); p.temp = val("f_temp", p.temp); p.cycles = val("f_cycles", p.cycles);
+      } else if (f.proc === "恒力弹簧") {
+        p.od = val("f_od", p.od); p.wire = val("f_wire", p.wire); p.len = val("f_len", p.len);
+        p.load = val("f_load", p.load); p.temp = val("f_temp", p.temp);
+      } else if (f.proc === "机加工弹簧") {
         p.bore = val("f_bore", p.bore); p.load = val("f_load", p.load);
       } else {
         p.wire = val("f_wire", p.wire); p.meanD = val("f_meanD", p.meanD); p.coils = val("f_coils", p.coils);
@@ -2600,8 +2869,8 @@ p.vacuum = sel("f_vacuum", String(p.vacuum)) === "1" ? 1 : 0;
   function update() {
     var f = famInfo();
     readFields();
-    RES = f.cat === "bellows" ? calcBellows(params(), f) : f.cat === "spring" ? calcSpring(params(), f) : calcCoupling(params(), f);
-    MESH = f.cat === "bellows" ? meshBellows(params(), f) : f.cat === "spring" ? meshSpring(params(), f) : meshCoupling(params(), f);
+    RES = f.cat === "bellows" ? calcBellows(params(), f) : f.cat === "spring" ? calcSpring(params(), f) : f.cat === "hardware" ? calcSpecial(params(), f) : calcCoupling(params(), f);
+    MESH = f.cat === "bellows" ? meshBellows(params(), f) : f.cat === "spring" ? meshSpring(params(), f) : f.cat === "hardware" ? meshHardware(params(), f) : meshCoupling(params(), f);
     renderResult(f);
     
   }
@@ -2630,6 +2899,11 @@ p.vacuum = sel("f_vacuum", String(p.vacuum)) === "1" ? 1 : 0;
     note.textContent = f.note;
     var m = RES.metrics;
     if (f.cat === "bellows") hud.innerHTML = "<span>推力 " + fmt(m.F, 1) + " N</span><span>A_eff " + fmt(m.A, 0) + " mm²</span><span>k " + fmt(m.k, 2) + " N/mm</span>";
+    else if (f.cat === "hardware") hud.innerHTML = f.proc === "螺栓 / 螺钉"
+      ? "<span>承载力 " + fmt(m.F, 0) + " N</span><span>A " + fmt(m.A, 1) + " mm²</span>"
+      : "<span>承压 " + fmt(m.p, 2) + " MPa</span><span>A " + fmt(m.A, 0) + " mm²</span>";
+    else if (f.proc === "恒力弹簧") hud.innerHTML = "<span>F " + fmt(m.F, 2) + " N</span>";
+    else if (f.proc === "碟形弹簧") hud.innerHTML = "<span>k " + fmt(m.k, 1) + " N/mm</span><span>F压平 " + fmt(m.F, 0) + " N</span>";
     else if (f.cat === "spring") hud.innerHTML = "<span>k " + fmt(m.k, 2) + " N/mm</span>" + (m.tau ? "<span>τ " + fmt(m.tau, 0) + " MPa</span>" : "") + (m.C ? "<span>C " + fmt(m.C, 1) + "</span>" : "");
     else hud.innerHTML = "<span>额定 " + fmt(m.Tcap, 1) + " N·m</span><span>J " + fmt(m.J, 0) + " mm⁴</span>";
   }
@@ -2666,6 +2940,10 @@ p.vacuum = sel("f_vacuum", String(p.vacuum)) === "1" ? 1 : 0;
 
   function setFam(k) {
     state.fam = k;
+    var proc0 = FAM[k].proc;
+    if (proc0 === "碟形弹簧" || proc0 === "垫圈 / 垫片") { state.yaw = 0.32; state.pitch = 0.55; state.auto = false; }
+    else if (proc0 === "螺栓 / 螺钉") { state.yaw = 1.15; state.pitch = 0.34; state.auto = true; }
+    else { state.yaw = 1.35; state.pitch = 0.24; state.auto = true; }
     state.cat = FAM[k].cat;
     state.p = defaults(k);
     Array.prototype.forEach.call(document.querySelectorAll("[data-cat]"), function (b) {
