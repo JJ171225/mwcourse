@@ -2212,16 +2212,24 @@ function radialRing(verts, r, z, segs) {
         radialRing(verts, Ro, z, segs);
         if (i > 0) {
           var ph0 = (i / rings) * (p.coils || 6);
-          ringFaces(faces, (i - 1) * segs, i * segs, segs, [198, 206, 218], function (j) {
-            var ph = ((j / segs + ph0) % 1);
-            return ph < slotW;
-          });
+          for (var jj = 0; jj < segs; jj++) {
+            var jn = (jj + 1) % segs;
+            var qq = ((jj / segs + ph0) % 1);
+            var col = qq < slotW ? [56, 64, 76] : [198, 206, 218];
+            faces.push({ v: [(i - 1) * segs + jj, (i - 1) * segs + jn, i * segs + jn, i * segs + jj], c: col });
+          }
         }
+      }
+      var slots = [];
+      for (var st = 0; st <= 260; st++) {
+        var tt2 = st / 260;
+        var ang2 = tt2 * (p.coils || 6) * 2 * PI;
+        slots.push([Math.cos(ang2) * Ro, Math.sin(ang2) * Ro, (tt2 - 0.5) * L]);
       }
       var bi = radialRing(verts, Ro * 0.999, L / 2, segs);
       var bc = verts.length; verts.push([0, 0, L / 2]);
       for (var k = 0; k < segs; k++) faces.push({ v: [bc, bi + k, bi + (k + 1) % segs], c: [150, 158, 172] });
-      return { verts: verts, faces: faces };
+      return { verts: verts, faces: faces, lines: [slots] };
     }
     var R = p.meanD / 2, wr = Math.max(p.wire / 2, 0.3), L = p.len;
     var turns = Math.max(p.coils, 1);
@@ -2310,6 +2318,17 @@ function radialRing(verts, r, z, segs) {
         });
       }
     }
+    /* 螺旋槽线 */
+    var lines = [];
+    for (var si = 0; si < 2; si++) {
+      var pts = [];
+      for (var st2 = 0; st2 <= 200; st2++) {
+        var t3 = st2 / 200;
+        var aa = (t3 * 2 + si * 0.5) * 2 * PI;
+        pts.push([Math.cos(aa) * Ro, Math.sin(aa) * Ro, (t3 - 0.5) * (L - 2 * hubLen)]);
+      }
+      lines.push(pts);
+    }
     /* 内孔 */
     var b0 = radialRing(verts, boreR, -L / 2, 48), b1 = radialRing(verts, boreR, L / 2, 48);
     for (var k2 = 0; k2 < 48; k2++) {
@@ -2333,7 +2352,7 @@ function radialRing(verts, r, z, segs) {
       for (var q3 = 0; q3 < 10; q3++) { var qa = q3 / 10 * 2 * PI; verts.push([Ro * 1.01 + 0.2, MATH.cos(qa) * Ro * 0.12, zc + MATH.sin(qa) * Ro * 0.12]); }
       for (var q4 = 0; q4 < 10; q4++) faces.push({ v: [sc, sb + q4, sb + (q4 + 1) % 10], c: [120, 128, 142] });
     });
-    return { verts: verts, faces: faces };
+    return { verts: verts, faces: faces, lines: lines };
   }
 
   /* ---------------- 渲染 ---------------- */
@@ -2420,6 +2439,26 @@ function radialRing(verts, r, z, segs) {
       CTX.lineWidth = 0.7;
       CTX.stroke();
     });
+
+    if (MESH.lines) {
+      CTX.lineCap = "round";
+      CTX.lineWidth = Math.max(2.5, scale * 0.42);
+      CTX.strokeStyle = "rgba(42,50,62,.92)";
+      MESH.lines.forEach(function (pts) {
+        var pen = false;
+        CTX.beginPath();
+        for (var li = 0; li < pts.length; li++) {
+          var p0 = pts[li];
+          var nv = rot([p0[0], p0[1], 0]);
+          if (nv[2] < 0.05) { pen = false; continue; }
+          var pv = rot([p0[0], p0[1], p0[2] * squash]);
+          var pf = clamp(camD / (camD - pv[2]), 0.62, 1.55);
+          var px = cx + pv[0] * scale * pf * state.zoom, py = cy - pv[1] * scale * pf * state.zoom;
+          if (!pen) { CTX.moveTo(px, py); pen = true; } else { CTX.lineTo(px, py); }
+        }
+        CTX.stroke();
+      });
+    }
   }
 
   function loop(ts) {
