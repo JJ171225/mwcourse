@@ -2032,8 +2032,6 @@ window.COURSE.content[6] = {
     checks.push(chk("介质兼容", MAT[mat.key].name, need === 2 ? "≥ 316L" : "304 起",
       MAT[mat.key].corr >= need ? "ok" : "bad",
       need === 2 ? "腐蚀性介质需 316L 及以上；含氯离子建议 Inconel。" : "无腐蚀介质，304/316L 均可。"));
-    checks.push(chk("端接形式", p.endType === "flange" ? "法兰" : p.endType === "thread" ? "螺纹" : "焊接",
-      "—", "ok", p.endType === "weld" ? "焊接端接泄漏风险最低，但不可拆。" : p.endType === "flange" ? "法兰可拆，需校核螺栓预紧与密封面。" : "螺纹端接适合小口径，注意拧紧扭矩。"));
 
     return {
       checks: checks, verdict: worstOf(checks),
@@ -2155,7 +2153,7 @@ function radialRing(verts, r, z, segs) {
     var R = p.od / 2, h = MATH.max(p.waveH, 0.2), n = MATH.max(p.waves, 1);
     var comp = clamp(p.stroke / MATH.max(p.len, 1), 0, 0.55);
     var L = p.len * (1 - comp);
-    var segs = 76, rings = Math.max(64, Math.round(n * 11));
+    var segs = 84, rings = Math.max(80, Math.round(n * 14));
     var verts = [], faces = [];
     for (var i = 0; i <= rings; i++) {
       var t = i / rings, z = t * L - L / 2;
@@ -2163,40 +2161,7 @@ function radialRing(verts, r, z, segs) {
       prof = p.waveShape === "v" ? Math.pow(prof, 1.7) : Math.pow(prof, 0.85);
       var r = R - h * prof;
       radialRing(verts, r, z, segs);
-      if (i > 0) ringFaces(faces, (i - 1) * segs, i * segs, segs, (i % 11 === 0 && f.seam) ? [162, 170, 182] : [202, 210, 222]);
-    }
-    /* 内壁（通孔） */
-    var boreR = R * 0.56, zb = -L / 2, ze = L / 2, innerBase = [];
-    for (var b = 0; b < 2; b++) innerBase.push(radialRing(verts, boreR, b ? ze : zb, 40));
-    for (var k = 0; k < 40; k++) {
-      var k2 = (k + 1) % 40;
-      faces.push({ v: [innerBase[0] + k, innerBase[1] + k, innerBase[1] + k2, innerBase[0] + k2], c: [72, 80, 92] });
-    }
-    /* 法兰 */
-    if (f.flange) {
-      [-1, 1].forEach(function (sgn) {
-        var z0 = sgn > 0 ? L / 2 : -L / 2 - 4;
-        var rOut = R * 1.26, baseA = radialRing(verts, R * 0.98, z0, segs), baseB = radialRing(verts, rOut, z0, segs);
-        var baseC = radialRing(verts, rOut, z0 + 4, segs), baseD = radialRing(verts, R * 0.98, z0 + 4, segs);
-        ringFaces(faces, baseB, baseC, segs, [186, 194, 206]);
-        for (var j = 0; j < segs; j++) {
-          var j2 = (j + 1) % segs;
-          faces.push({ v: [baseA + j, baseB + j, baseB + j2, baseA + j2], c: [176, 184, 196] });
-          faces.push({ v: [baseD + j, baseD + j2, baseC + j2, baseC + j], c: [176, 184, 196] });
-        }
-        /* 螺栓孔：法兰面上的深色小圆 */
-        for (var bnum = 0; bnum < 6; bnum++) {
-          var ang = bnum / 6 * 2 * PI + 0.26;
-          var bx = MATH.cos(ang) * rOut * 0.82, by = MATH.sin(ang) * rOut * 0.82;
-          var bc = verts.length; verts.push([bx, by, z0 + 4.05]);
-          var bb = verts.length;
-          for (var q = 0; q < 8; q++) {
-            var qa = q / 8 * 2 * PI, qr = R * 0.09;
-            verts.push([bx + MATH.cos(qa) * qr, by + MATH.sin(qa) * qr, z0 + 4.05]);
-          }
-          for (var q2 = 0; q2 < 8; q2++) faces.push({ v: [bc, bb + q2, bb + (q2 + 1) % 8], c: [58, 66, 78] });
-        }
-      });
+      if (i > 0) ringFaces(faces, (i - 1) * segs, i * segs, segs, (i % 14 === 0 && f.seam) ? [178, 186, 198] : [202, 210, 222]);
     }
     return { verts: verts, faces: faces };
   }
@@ -2415,7 +2380,8 @@ function radialRing(verts, r, z, segs) {
       var n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
       var nl = MATH.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]) || 1;
       n = [n[0] / nl, n[1] / nl, n[2] / nl];
-      if (n[2] < -0.02) n = [-n[0], -n[1], -n[2]]; // 背面不剔除，用双面光照，避免看穿
+      var back = n[2] < -0.02;
+      if (back) n = [-n[0], -n[1], -n[2]];
       var diff = MATH.max(0, n[0] * light[0] + n[1] * light[1] + n[2] * light[2]);
       var spec = MATH.pow(MATH.max(0, n[0] * half[0] + n[1] * half[1] + n[2] * half[2]), 22) * 0.55;
       var shade = 0.34 + 0.66 * diff;
@@ -2488,7 +2454,6 @@ function radialRing(verts, r, z, segs) {
       '<label>温度<span><input id="f_temp" type="number" step="5" value="' + p.temp + '"> °C</span></label>' +
       '<label>层数<select id="f_layers">' + opt([{ v: 1, t: "单层" }, { v: 2, t: "双层" }, { v: 3, t: "三层" }], p.layers) + "</select></label>" +
       '<label>波型<select id="f_waveShape">' + opt([{ v: "u", t: "U 形波" }, { v: "v", t: "V 形波（更硬）" }], p.waveShape) + "</select></label>" +
-      '<label>端接<select id="f_endType">' + opt([{ v: "flange", t: "法兰" }, { v: "thread", t: "螺纹" }, { v: "weld", t: "焊接" }], p.endType) + "</select></label>" +
       '<label>工况<select id="f_vacuum">' + opt([{ v: 0, t: "内压 / 常压" }, { v: 1, t: "真空（外压）" }], p.vacuum) + "</select></label>" +
       '<label class="wide">介质<select id="f_medium">' + opt([
         { v: "gas-inert", t: "气体 · 无腐蚀" }, { v: "gas-corr", t: "气体 · 腐蚀性" },
@@ -2614,7 +2579,7 @@ function radialRing(verts, r, z, segs) {
       p.wall = val("f_wall", p.wall); p.waveH = val("f_waveH", p.waveH); p.waves = val("f_waves", p.waves);
       p.stroke = val("f_stroke", p.stroke); p.pressure = val("f_pressure", p.pressure);
       p.layers = val("f_layers", p.layers); p.waveShape = sel("f_waveShape", p.waveShape);
-      p.endType = sel("f_endType", p.endType); p.vacuum = sel("f_vacuum", String(p.vacuum)) === "1" ? 1 : 0;
+p.vacuum = sel("f_vacuum", String(p.vacuum)) === "1" ? 1 : 0;
       p.medium = sel("f_medium", p.medium);
     } else if (f.cat === "spring") {
       if (f.proc === "机加工弹簧") {
