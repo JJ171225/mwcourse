@@ -698,6 +698,11 @@ html[data-theme="dark"] .lab-verdict.bad{background:rgba(211,74,58,.14)}
 @media(max-width:520px){.lab-fields{grid-template-columns:1fr}}
 @media(max-width:760px){.lab-ref{margin-bottom:96px}}
 
+.lab-play{position:absolute;left:12px;top:12px;background:#101820;color:#FFD600;border:0;border-radius:999px;padding:8px 14px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(8,18,32,.25);z-index:2}
+.lab-play.on{background:#FFD600;color:#101820;box-shadow:0 0 0 3px rgba(255,214,0,.35)}
+html[data-theme="dark"] .lab-play{background:#FFD600;color:#101820}
+html[data-theme="dark"] .lab-play.on{background:#101820;color:#FFD600;box-shadow:0 0 0 2px #FFD600}
+
 </style>
 </head>
 <body>
@@ -2128,168 +2133,207 @@ window.COURSE.content[6] = {
   }
 
   /* ---------------- 网格 ---------------- */
+function radialRing(verts, r, z, segs) {
+    var base = verts.length;
+    for (var j = 0; j < segs; j++) {
+      var a = j / segs * 2 * PI;
+      verts.push([MATH.cos(a) * r, MATH.sin(a) * r, z]);
+    }
+    return base;
+  }
+
+  function ringFaces(faces, a, b, segs, col, skip) {
+    for (var j = 0; j < segs; j++) {
+      if (skip && skip(j)) continue;
+      var j2 = (j + 1) % segs;
+      faces.push({ v: [a + j, a + j2, b + j2, b + j], c: col });
+    }
+  }
+
+  /* 波纹管：圆角波 + 法兰（带螺栓孔）+ 通孔 */
   function meshBellows(p, f) {
     var R = p.od / 2, h = MATH.max(p.waveH, 0.2), n = MATH.max(p.waves, 1);
     var comp = clamp(p.stroke / MATH.max(p.len, 1), 0, 0.55);
     var L = p.len * (1 - comp);
-    var segs = 64, rings = MATH.max(36, MATH.round(n * 6));
+    var segs = 76, rings = Math.max(64, Math.round(n * 11));
     var verts = [], faces = [];
     for (var i = 0; i <= rings; i++) {
       var t = i / rings, z = t * L - L / 2;
       var prof = 0.5 - 0.5 * MATH.cos(2 * PI * n * t);
-      var r = R - h * (p.waveShape === "v" ? MATH.pow(prof, 1.6) : prof);
-      for (var j = 0; j < segs; j++) {
-        var a = j / segs * 2 * PI;
-        verts.push([MATH.cos(a) * r, MATH.sin(a) * r, z]);
-      }
+      prof = p.waveShape === "v" ? Math.pow(prof, 1.7) : Math.pow(prof, 0.85);
+      var r = R - h * prof;
+      radialRing(verts, r, z, segs);
+      if (i > 0) ringFaces(faces, (i - 1) * segs, i * segs, segs, (i % 11 === 0 && f.seam) ? [162, 170, 182] : [202, 210, 222]);
     }
-    for (var i2 = 0; i2 < rings; i2++) {
-      for (var j2 = 0; j2 < segs; j2++) {
-        var a0 = i2 * segs + j2, b0 = i2 * segs + (j2 + 1) % segs;
-        var c0 = (i2 + 1) * segs + (j2 + 1) % segs, d0 = (i2 + 1) * segs + j2;
-        var band = (i2 % 6 === 0) && f.seam ? [150, 158, 170] : [198, 206, 218];
-        faces.push({ v: [a0, b0, c0, d0], c: band });
-      }
+    /* 内壁（通孔） */
+    var boreR = R * 0.56, zb = -L / 2, ze = L / 2, innerBase = [];
+    for (var b = 0; b < 2; b++) innerBase.push(radialRing(verts, boreR, b ? ze : zb, 40));
+    for (var k = 0; k < 40; k++) {
+      var k2 = (k + 1) % 40;
+      faces.push({ v: [innerBase[0] + k, innerBase[1] + k, innerBase[1] + k2, innerBase[0] + k2], c: [72, 80, 92] });
     }
+    /* 法兰 */
     if (f.flange) {
-      [-L / 2, L / 2].forEach(function (z, idx) {
-        var zz = idx === 0 ? z - 3 : z, base = verts.length, r2 = R * 1.08;
-        for (var k = 0; k < segs; k++) {
-          var a = k / segs * 2 * PI;
-          verts.push([MATH.cos(a) * r2, MATH.sin(a) * r2, zz]);
-          verts.push([MATH.cos(a) * r2, MATH.sin(a) * r2, zz + 3]);
+      [-1, 1].forEach(function (sgn) {
+        var z0 = sgn > 0 ? L / 2 : -L / 2 - 4;
+        var rOut = R * 1.26, baseA = radialRing(verts, R * 0.98, z0, segs), baseB = radialRing(verts, rOut, z0, segs);
+        var baseC = radialRing(verts, rOut, z0 + 4, segs), baseD = radialRing(verts, R * 0.98, z0 + 4, segs);
+        ringFaces(faces, baseB, baseC, segs, [186, 194, 206]);
+        for (var j = 0; j < segs; j++) {
+          var j2 = (j + 1) % segs;
+          faces.push({ v: [baseA + j, baseB + j, baseB + j2, baseA + j2], c: [176, 184, 196] });
+          faces.push({ v: [baseD + j, baseD + j2, baseC + j2, baseC + j], c: [176, 184, 196] });
         }
-        for (var k2 = 0; k2 < segs; k2++) {
-          var i0 = base + k2 * 2, i1 = base + ((k2 + 1) % segs) * 2;
-          faces.push({ v: [i0, i1, i1 + 1, i0 + 1], c: [188, 196, 208] });
+        /* 螺栓孔：法兰面上的深色小圆 */
+        for (var bnum = 0; bnum < 6; bnum++) {
+          var ang = bnum / 6 * 2 * PI + 0.26;
+          var bx = MATH.cos(ang) * rOut * 0.82, by = MATH.sin(ang) * rOut * 0.82;
+          var bc = verts.length; verts.push([bx, by, z0 + 4.05]);
+          var bb = verts.length;
+          for (var q = 0; q < 8; q++) {
+            var qa = q / 8 * 2 * PI, qr = R * 0.09;
+            verts.push([bx + MATH.cos(qa) * qr, by + MATH.sin(qa) * qr, z0 + 4.05]);
+          }
+          for (var q2 = 0; q2 < 8; q2++) faces.push({ v: [bc, bb + q2, bb + (q2 + 1) % 8], c: [58, 66, 78] });
         }
       });
     }
-    [-L / 2, L / 2].forEach(function (z) {
-      var c0 = verts.length; verts.push([0, 0, z]);
-      var r0 = R * 0.99, b0 = verts.length;
-      for (var k = 0; k < segs; k++) { var a = k / segs * 2 * PI; verts.push([MATH.cos(a) * r0, MATH.sin(a) * r0, z]); }
-      for (var k2 = 0; k2 < segs; k2++) faces.push({ v: [c0, b0 + k2, b0 + (k2 + 1) % segs], c: [176, 184, 196] });
-      var ir = R * 0.45, ic = verts.length; verts.push([0, 0, z + (z > 0 ? -0.6 : 0.6)]);
-      var ib = verts.length; for (var kk = 0; kk < segs; kk++) { var aa = kk / segs * 2 * Math.PI; verts.push([Math.cos(aa) * ir, Math.sin(aa) * ir, z + (z > 0 ? -0.6 : 0.6)]); }
-      for (var kk2 = 0; kk2 < segs; kk2++) faces.push({ v: [ic, ib + kk2, ib + (kk2 + 1) % segs], c: [64, 72, 84] });
-    });
-    return { verts: verts, faces: faces, tint: [198, 206, 218] };
+    return { verts: verts, faces: faces };
   }
 
+  /* 弹簧：螺旋线 + 端部封盖；机加工版为带螺旋槽的整体管 */
   function meshSpring(p, f) {
-    if (f.proc === "机加工弹簧") {
-      var Ro = p.od / 2, Lm = p.len, segs2 = 56, rings2 = 30, verts0 = [], faces0 = [];
-      for (var i = 0; i <= rings2; i++) {
-        var t = i / rings2, z = t * Lm - Lm / 2;
-        for (var j = 0; j < segs2; j++) {
-          var a = j / segs2 * 2 * PI;
-          verts0.push([MATH.cos(a) * Ro, MATH.sin(a) * Ro, z]);
-        }
-      }
-      for (var i2 = 0; i2 < rings2; i2++) {
-        for (var j2 = 0; j2 < segs2; j2++) {
-          var a0 = i2 * segs2 + j2, b0 = i2 * segs2 + (j2 + 1) % segs2;
-          var c0 = (i2 + 1) * segs2 + (j2 + 1) % segs2, d0 = (i2 + 1) * segs2 + j2;
-          var ph = ((j2 / segs2 * (p.coils || 6) + i2 / rings2) % 1);
-          var dark = ph < 0.04 || ph > 0.96;
-          faces0.push({ v: [a0, b0, c0, d0], c: dark ? [52, 62, 76] : [188, 196, 208] });
-        }
-      }
-      return { verts: verts0, faces: faces0, tint: [188, 196, 208] };
-    }
-    var R = p.meanD / 2, wr = MATH.max(p.wire / 2, 0.3), L = p.len;
-    var turns = MATH.max(p.coils, 1);
-    var along = MATH.round(turns * 24), around = 10;
     var verts = [], faces = [];
-    var flat = p.endType === "ground" || p.endType === "closed" ? 0.5 : 0;
-    for (var k = 0; k <= along; k++) {
-      var t = k / along;
-      var tt = (t * (turns + 2 * flat) - flat) / turns;
-      tt = clamp(tt, 0, 1);
-      var ang = tt * turns * 2 * PI + (p.endType === "ground" ? 0 : 0);
-      var z = tt * (L - 2 * wr) + wr - (L - 2 * wr) / 2 + (L - 2 * wr) / 2 - (L - 2 * wr) / 2;
-      z = (tt - 0.5) * (L - 2 * wr);
+    if (f.proc === "机加工弹簧") {
+      var Ro = p.od / 2, Ri = Math.max(p.bore / 2, 0.5), L = p.len, segs = 72, rings = 48;
+      var slotW = 0.05;
+      for (var i = 0; i <= rings; i++) {
+        var t = i / rings, z = t * L - L / 2;
+        radialRing(verts, Ro, z, segs);
+        if (i > 0) {
+          var ph0 = (i / rings) * (p.coils || 6);
+          ringFaces(faces, (i - 1) * segs, i * segs, segs, [198, 206, 218], function (j) {
+            var ph = ((j / segs + ph0) % 1);
+            return ph < slotW;
+          });
+        }
+      }
+      var bi = radialRing(verts, Ro * 0.999, L / 2, segs);
+      var bc = verts.length; verts.push([0, 0, L / 2]);
+      for (var k = 0; k < segs; k++) faces.push({ v: [bc, bi + k, bi + (k + 1) % segs], c: [150, 158, 172] });
+      return { verts: verts, faces: faces };
+    }
+    var R = p.meanD / 2, wr = Math.max(p.wire / 2, 0.3), L = p.len;
+    var turns = Math.max(p.coils, 1);
+    var along = Math.round(turns * 26), around = 10;
+    for (var a = 0; a <= along; a++) {
+      var tt = a / along;
+      var ang = tt * turns * 2 * PI;
+      var z = (tt - 0.5) * (L - 2 * wr);
       var cx = MATH.cos(ang) * R, cy = MATH.sin(ang) * R;
-      var rx = MATH.cos(ang), ry = MATH.sin(ang);
+      var rx = MATH.cos(ang), ry = Math.sin(ang);
       for (var j = 0; j < around; j++) {
-        var a = j / around * 2 * PI;
-        verts.push([cx + MATH.cos(a) * wr * rx, cy + MATH.cos(a) * wr * ry, z + MATH.sin(a) * wr]);
+        var q = j / around * 2 * PI;
+        verts.push([cx + MATH.cos(q) * wr * rx, cy + Math.cos(q) * wr * ry, z + Math.sin(q) * wr]);
       }
     }
-    for (var i3 = 0; i3 < along; i3++) {
-      for (var j3 = 0; j3 < around; j3++) {
-        var a1 = i3 * around + j3, b1 = i3 * around + (j3 + 1) % around;
-        var c1 = (i3 + 1) * around + (j3 + 1) % around, d1 = (i3 + 1) * around + j3;
-        faces.push({ v: [a1, b1, c1, d1], c: [200, 206, 216] });
-      }
+    for (var a2 = 0; a2 < along; a2++) {
+      ringFaces(faces, a2 * around, (a2 + 1) * around, around, [204, 210, 220]);
     }
-    return { verts: verts, faces: faces, tint: [200, 206, 216] };
+    /* 两端磨平封盖 */
+    [0, along].forEach(function (idx) {
+      var ring = idx * around, c0 = verts.length;
+      var zc = idx === 0 ? verts[ring][2] : verts[ring][2];
+      verts.push([0, 0, zc]);
+      for (var q2 = 0; q2 < around; q2++) faces.push({ v: [c0, ring + q2, ring + (q2 + 1) % around], c: [186, 194, 206] });
+    });
+    return { verts: verts, faces: faces };
   }
 
+  /* 联轴器：双螺旋切槽 + 夹紧轮毂 + 内孔 */
   function meshCoupling(p, f) {
-    var Ro = p.od / 2, L = p.len, segs = 64, rings = 28, verts = [], faces = [];
+    var Ro = p.od / 2, L = p.len, verts = [], faces = [];
     if (f.proc === "波纹管联轴器") {
-      var R = Ro * 0.72, h = 1.6, n = MATH.max(p.waves, 6);
-      var rings2 = n * 6;
+      var R = Ro * 0.72, h = 1.6, n = Math.max(p.waves, 6), rings2 = n * 6, segsB = 64;
       for (var i = 0; i <= rings2; i++) {
         var t = i / rings2, z = t * L - L / 2;
-        var r = R - h * (0.5 - 0.5 * MATH.cos(2 * PI * n * t));
-        for (var j = 0; j < segs; j++) {
-          var a = j / segs * 2 * PI;
-          verts.push([MATH.cos(a) * r, MATH.sin(a) * r, z]);
-        }
-      }
-      for (var i2 = 0; i2 < rings2; i2++) for (var j2 = 0; j2 < segs; j2++) {
-        var a0 = i2 * segs + j2, b0 = i2 * segs + (j2 + 1) % segs;
-        var c0 = (i2 + 1) * segs + (j2 + 1) % segs, d0 = (i2 + 1) * segs + j2;
-        faces.push({ v: [a0, b0, c0, d0], c: [190, 198, 210] });
+        var r = R - h * (0.5 - 0.5 * Math.cos(2 * PI * n * t));
+        radialRing(verts, r, z, segsB);
+        if (i > 0) ringFaces(faces, (i - 1) * segsB, i * segsB, segsB, [194, 202, 214]);
       }
       [1, -1].forEach(function (sgn) {
-        var z0 = sgn * (L / 2 - 6), z1 = sgn * L / 2, base = verts.length;
-        for (var k = 0; k < segs; k++) {
-          var a = k / segs * 2 * PI;
-          verts.push([MATH.cos(a) * Ro, MATH.sin(a) * Ro, z0]);
-          verts.push([MATH.cos(a) * Ro, MATH.sin(a) * Ro, z1]);
-        }
-        for (var k2 = 0; k2 < segs; k2++) {
-          var i0 = base + k2 * 2, i1 = base + ((k2 + 1) % segs) * 2;
-          faces.push({ v: [i0, i1, i1 + 1, i0 + 1], c: [120, 130, 146] });
-        }
+        var z0 = sgn > 0 ? L / 2 - 8 : -L / 2, z1 = sgn > 0 ? L / 2 : -L / 2 + 8;
+        var hb = radialRing(verts, Ro, z0, segsB), hb2 = radialRing(verts, Ro, z1, segsB);
+        ringFaces(faces, hb, hb2, segsB, [148, 158, 172]);
+        var cap = verts.length; verts.push([0, 0, z1]);
+        var ring = radialRing(verts, Ro, z1, segsB);
+        for (var k = 0; k < segsB; k++) faces.push({ v: [cap, ring + k, ring + (k + 1) % segsB], c: [140, 150, 164] });
       });
-      return { verts: verts, faces: faces, tint: [190, 198, 210] };
+      return { verts: verts, faces: faces };
     }
     if (f.proc === "万向节") {
-      var Rj = Ro, Lj = L;
-      function box(cx, cy, cz, sx, sy, sz, col) {
-        var base = verts.length;
-        var pts = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]];
-        pts.forEach(function (q) { verts.push([cx + q[0] * sx / 2, cy + q[1] * sy / 2, cz + q[2] * sz / 2]); });
-        [[0, 1, 2], [0, 2, 3], [4, 6, 5], [4, 7, 6], [0, 4, 5], [0, 5, 1], [1, 5, 6], [1, 6, 2], [2, 6, 7], [2, 7, 3], [3, 7, 4], [3, 4, 0]].forEach(function (t3) {
-          faces.push({ v: [base + t3[0], base + t3[1], base + t3[2]], c: col });
+      var Rj = Ro, Lj = L, segsU = 40;
+      function yoke(zc, dir) {
+        var ring = radialRing(verts, Rj * 0.95, zc, segsU);
+        var ring2 = radialRing(verts, Rj * 0.95, zc + dir * 10, segsU);
+        ringFaces(faces, ring, ring2, segsU, [156, 166, 180]);
+        for (var e = 0; e < 2; e++) {
+          var ex = (e ? 1 : -1) * Rj * 0.62;
+          var base = verts.length;
+          [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function (q, qi) {
+            var x = ex + q[0] * 3, y = q[1] * Rj * 0.42, z = zc + dir * (6 + qi * 0);
+            verts.push([x, y, z]);
+          });
+          for (var q2 = 0; q2 < 4; q2++) faces.push({ v: [base + q2, base + (q2 + 1) % 4, base + (q2 + 1) % 4, base + q2], c: [176, 186, 198] });
+        }
+      }
+      yoke(-Lj / 2, 1); yoke(Lj / 2, -1);
+      var cx = verts.length; verts.push([0, 0, 0]);
+      return { verts: verts, faces: faces };
+    }
+    /* 螺旋梁：轮毂 + 双螺旋槽 */
+    var segs = 96, hubLen = L * 0.22, beamLen = L - 2 * hubLen, rings = 84, boreR = p.bore / 2;
+    var slotW = 0.04, hubSlit = 0.02;
+    for (var s2 = 0; s2 <= rings; s2++) {
+      var t2 = s2 / rings, z2 = t2 * L - L / 2;
+      radialRing(verts, Ro, z2, segs);
+      if (s2 > 0) {
+        var inBeam = (z2 > -L / 2 + hubLen) && (z2 < L / 2 - hubLen);
+        var ph = ((t2 * (L / beamLen)) % 1);
+        ringFaces(faces, (s2 - 1) * segs, s2 * segs, segs, [196, 204, 216], function (j) {
+          if (!inBeam) {
+            var hj = j / segs;
+            return (hj < hubSlit || hj > 1 - hubSlit);
+          }
+          var q = ((j / segs * 2 + ph) % 1);
+          return q < slotW || q > 1 - slotW;
         });
       }
-      box(0, 0, -Lj / 2 + 8, Rj * 1.7, Rj * 1.7, 16, [150, 160, 175]);
-      box(0, 0, Lj / 2 - 8, Rj * 1.7, Rj * 1.7, 16, [150, 160, 175]);
-      box(0, 0, 0, Rj * 1.75, 6, 6, [190, 198, 210]);
-      box(0, 0, 0, 6, Rj * 1.75, 6, [190, 198, 210]);
-      return { verts: verts, faces: faces, tint: [170, 178, 190] };
     }
-    for (var i4 = 0; i4 <= rings; i4++) {
-      var t4 = i4 / rings, z4 = t4 * L - L / 2;
-      for (var j4 = 0; j4 < segs; j4++) {
-        var a4 = j4 / segs * 2 * PI;
-        verts.push([MATH.cos(a4) * Ro, MATH.sin(a4) * Ro, z4]);
-      }
+    /* 内孔 */
+    var b0 = radialRing(verts, boreR, -L / 2, 48), b1 = radialRing(verts, boreR, L / 2, 48);
+    for (var k2 = 0; k2 < 48; k2++) {
+      var k3 = (k2 + 1) % 48;
+      faces.push({ v: [b0 + k2, b1 + k2, b1 + k3, b0 + k3], c: [66, 74, 86] });
     }
-    for (var i5 = 0; i5 < rings; i5++) for (var j5 = 0; j5 < segs; j5++) {
-      var a5 = i5 * segs + j5, b5 = i5 * segs + (j5 + 1) % segs;
-      var c5 = (i5 + 1) * segs + (j5 + 1) % segs, d5 = (i5 + 1) * segs + j5;
-      var phase = ((j5 / segs * 2 + i5 / rings) % 1);
-      var dark = phase < 0.045 || phase > 0.955;
-      faces.push({ v: [a5, b5, c5, d5], c: dark ? [46, 58, 74] : [190, 197, 208] });
-    }
-    return { verts: verts, faces: faces, tint: [190, 197, 208] };
+    /* 端面 */
+    [-L / 2, L / 2].forEach(function (ze) {
+      var ci = verts.length; verts.push([0, 0, ze]);
+      var ro = radialRing(verts, Ro, ze, segs);
+      for (var j2 = 0; j2 < segs; j2++) faces.push({ v: [ci, ro + j2, ro + (j2 + 1) % segs], c: [150, 158, 172] });
+      var ci2 = verts.length; verts.push([0, 0, ze + 0.01]);
+      var ri = radialRing(verts, boreR, ze + 0.01, 48);
+      for (var j3 = 0; j3 < 48; j3++) faces.push({ v: [ci2, ri + j3, ri + (j3 + 1) % 48], c: [58, 66, 78] });
+    });
+    /* 夹紧螺钉 */
+    [1, -1].forEach(function (sgn) {
+      var zc = sgn * (L / 2 - hubLen * 0.5);
+      var sc = verts.length; verts.push([Ro * 1.01, 0, zc]);
+      var sb = verts.length;
+      for (var q3 = 0; q3 < 10; q3++) { var qa = q3 / 10 * 2 * PI; verts.push([Ro * 1.01 + 0.2, MATH.cos(qa) * Ro * 0.12, zc + MATH.sin(qa) * Ro * 0.12]); }
+      for (var q4 = 0; q4 < 10; q4++) faces.push({ v: [sc, sb + q4, sb + (q4 + 1) % 10], c: [120, 128, 142] });
+    });
+    return { verts: verts, faces: faces };
   }
 
   /* ---------------- 渲染 ---------------- */
@@ -2315,7 +2359,7 @@ window.COURSE.content[6] = {
 
     var maxR = 1;
     MESH.verts.forEach(function (v) { maxR = MATH.max(maxR, MATH.abs(v[0]), MATH.abs(v[1]), MATH.abs(v[2]) / 1.3); });
-    var scale = MATH.min(W, H) * 0.30 / maxR;
+    var scale = MATH.min(W, H) * 0.22 / maxR;
     var cx = W / 2, cy = H / 2 + 8;
     var camD = maxR * 3.9;
 
@@ -2328,9 +2372,11 @@ window.COURSE.content[6] = {
     CTX.ellipse(cx, cy + scale * maxR * 0.62, scale * maxR * 1.35, scale * maxR * 0.22, 0, 0, 2 * PI);
     CTX.fill();
 
-    var view = MESH.verts.map(rot);
+    var ph = state.phase || 0;
+    var squash = state.anim ? 1 - 0.16 * (0.5 - 0.5 * MATH.cos(ph)) : 1;
+    var view = MESH.verts.map(function (v) { return rot([v[0], v[1], v[2] * squash]); });
     var proj = view.map(function (v) {
-      var f = clamp(camD / (camD - v[2]), 0.55, 2.4);
+      var f = clamp(camD / (camD - v[2]), 0.62, 1.55);
       return [cx + v[0] * scale * f * state.zoom, cy - v[1] * scale * f * state.zoom, v[2]];
     });
 
@@ -2378,6 +2424,7 @@ window.COURSE.content[6] = {
 
   function loop(ts) {
     if (state.auto && !state.drag) state.yaw = 1.35 + 0.38 * Math.sin((ts || 0) * 0.0006);
+    if (state.anim) state.phase = (state.phase || 0) + 0.055;
     if (!LAST || ts - LAST > 33) { draw(); LAST = ts; }
     RAF = requestAnimationFrame(loop);
   }
@@ -2477,6 +2524,7 @@ window.COURSE.content[6] = {
             '<canvas id="labCanvas" aria-label="三维模型，可拖动旋转"></canvas>' +
             '<div class="lab-hud" id="labHud"></div>' +
             '<div class="lab-tip">拖动旋转 · 滚轮缩放 · 双击复位</div>' +
+            '<button type="button" class="lab-play" id="labPlay">▶ 往复压缩</button>' +
           "</div>" +
           '<div class="lab-legend"><span><i class="ok"></i>满足</span><span><i class="warn"></i>临界</span><span><i class="bad"></i>不满足</span><span style="margin-left:auto" id="labFamNote"></span></div>' +
         "</div>" +
@@ -2551,6 +2599,7 @@ window.COURSE.content[6] = {
     RES = f.cat === "bellows" ? calcBellows(params(), f) : f.cat === "spring" ? calcSpring(params(), f) : calcCoupling(params(), f);
     MESH = f.cat === "bellows" ? meshBellows(params(), f) : f.cat === "spring" ? meshSpring(params(), f) : meshCoupling(params(), f);
     renderResult(f);
+    
   }
 
   function renderResult(f) {
@@ -2660,6 +2709,14 @@ window.COURSE.content[6] = {
     Array.prototype.forEach.call(document.querySelectorAll("[data-cat]"), function (b) {
       b.addEventListener("click", function () { setFam(CATS.filter(function (c) { return c.id === b.getAttribute("data-cat"); })[0].fams[0]); });
     });
+    var play = document.getElementById("labPlay");
+    if (play) {
+      play.addEventListener("click", function () {
+        state.anim = !state.anim;
+        play.classList.toggle("on", state.anim);
+        play.textContent = state.anim ? "❚❚ 暂停" : "▶ 往复压缩";
+      });
+    }
     renderFams(); bindCanvas(); renderFields(); update();
     cancelAnimationFrame(RAF); loop();
   }
